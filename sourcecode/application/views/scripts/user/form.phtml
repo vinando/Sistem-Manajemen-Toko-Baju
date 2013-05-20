@@ -1,0 +1,109 @@
+<style>
+	#available_selectable .ui-selecting { background: #FECA40; }
+	#available_selectable .ui-selected { background: #F39814; color: white; }
+	#available_selectable { list-style-type: none; margin: 0; padding: 0; width: 100%; }
+	#available_selectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+
+	#assigned_selectable .ui-selecting { background: #FECA40; }
+	#assigned_selectable .ui-selected { background: #F39814; color: white; }
+	#assigned_selectable { list-style-type: none; margin: 0; padding: 0; width: 100%; }
+	#assigned_selectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+</style>
+<div id="content_header"><h2>Master - User</h2><div style="float:right"><h2 id="form_type"><?php echo $this->strFormType;?> Record</h2></div></div>
+<hr>
+
+<form id="form" method="POST" action="/user/save" class="form_element" enctype="multipart/form-data" target="form_iframe">
+
+    <table id="table_form">
+        <tr>
+            <td>User Name *</td>
+            <td><input type="text" name="UserName" id="UserName" size="20" maxlength="20" value="<?php echo $this->Username;?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Password</td>
+            <td><input type="password" name="Password" id="Password" size="20" maxlength="255" value="" class="text"></td>
+        </tr>
+        <tr>
+            <td>Confirm Password</td>
+            <td><input type="password" name="ConfirmPassword" id="ConfirmPassword" size="20" maxlength="255" value="" class="text"></td>
+        </tr>
+        <tr>
+            <td>Full Name *</td>
+            <td><input type="text" name="FullName" id="FullName" size="50" maxlength="255" value="<?php echo $this->Fullname; ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Email *</td>
+            <td><input type="text" name="Email" id="Email" size="50" maxlength="50" value="<?php echo $this->Email; ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Role ID</td>
+            <td>
+                <select name="RoleID" id="RoleID" class="dropdown">
+                    <option value="">--</option>
+                    <?php
+                    foreach ($this->Roles as $arrRole) {
+                        ?>
+                        <option value="<?php echo $arrRole["id"];?>" <?php if ($this->RoleID == $arrRole["id"]) {echo "selected";}?>><?php echo $arrRole["name"]?></option>
+                        <?php
+                    }
+                    ?>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Branch ID</td>
+            <td>
+                <select name="BranchID" id="BranchID" class="dropdown">
+                    <option value="">--</option>
+                    <?php
+                    foreach ($this->Branches as $arrBranch) {
+                    ?>
+                    <option value="<?php echo $arrBranch["id"];?>" <?php if ($this->BranchID == $arrBranch["id"]) {echo "selected";}?>><?php echo $arrBranch["code"].' | '.$arrBranch["name"]?></option>
+                    <?php
+                    }
+                    ?>
+                </select>
+            </td>
+        </tr>
+    </table>
+<hr>
+<div id="form_save_result" class="form_save_success">Save successful</div>
+<input type="hidden" name="type" id="type" value="<?php echo $this->strFormType; ?>">
+<input type="hidden" name="userid" id="userid" value="<?php echo $this->strID; ?>">
+<input type="submit" value="Save" id="btn_save" class="button">
+<input type="button" value="New" id="btn_new" class="button" onclick="window.location='/user/form/type/add'">
+<input type="button" value="Delete" id="btn_delete" class="button">
+<input type="button" value="Close" id="btn_close" onclick="window.location='/user'" class="button">
+</form>
+<iframe id="form_iframe" name="form_iframe" src="" style="width:200;height:200;border:0px solid #FFFFFF;"></iframe>
+
+<div id="dialog-confirm" title="Delete record?" style="display:none">
+	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This record will be permanently deleted and cannot be recovered. Are you sure?</p>
+</div>
+<script>
+$('#btn_delete').click(function() {
+    if ($('#type').val() == "Add") {
+        return;
+    }
+
+	$( "#dialog-confirm" ).dialog({
+		resizable: false,
+		height:200,
+		modal: true,
+		buttons: {
+			"Delete record": function() {
+				$( this ).dialog("close");
+				$.get("/user/save/type/Delete/ID/" + $('#userid').val(), function() {
+				    window.location = '/user';
+				});
+			},
+			Cancel: function() {
+				$( this ).dialog("close");
+			}
+		}
+	});
+});
+
+$( "#tabs" ).tabs();
+$("#form").validate();
+</script>

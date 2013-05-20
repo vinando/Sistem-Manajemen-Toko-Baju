@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>ACC Branch Traffic Information System</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link type="text/css" href="/css/smoothness/jquery-ui-1.8.19.custom.css" rel="Stylesheet" />
+        <link type="text/css" href="/css/jquery.dataTables.css" rel="Stylesheet" />
+        <link type="text/css" href="/css/jquery.dataTables_themeroller.css" rel="Stylesheet" />
+        <link type="text/css" href="/css/style.css" rel="Stylesheet" />
+        <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+        <script type="text/javascript" src="/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="/js/main.js"></script>
+        <script type="text/javascript" src="/js/urlEncode.js"></script>
+        <script type="text/javascript" src="/js/jquery.validate.min.js"></script>
+        <script type="text/javascript" src="/js/ckeditor/ckeditor.js"></script>
+    </head>
+    <body>
+        <table width="100%" height="100%" id="main_container">
+            <tr>
+                <td colspan="2" id="pane_top">
+                    <table border="0" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td><img src="/images/logo.png"></td>
+                            <td valign="bottom" style="padding-bottom:15px;"><h1>Branch Traffic Monitoring System</h1><br>Astra Credit Companies</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+
+                <td height="100%" width="100%" id="pane_center"><?php echo $this->layout()->content; ?>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" id="pane_bottom">Logged in as <b><?php echo $_SESSION['FullName']?></b> <?php if($_SESSION["BranchID"]) {echo "at <b>{$_SESSION["BranchName"]}</b>";}?></td>
+            </tr>
+        </table>
+    </body>
+    <script>
+        $('#main_menu').accordion({autoHeight: false});
+        $(".button").button();
+
+        function activateAccordion(strAccordionID) {
+            if (strAccordionID) {
+                var intAccordionIndex = 0;
+
+                if (strAccordionID == "Master") {
+                    intAccordionIndex = 1;
+                }
+                else if (strAccordionID == "Frontliners") {
+                    intAccordionIndex = 2;
+                }
+                else if (strAccordionID == "Reporting") {
+                    intAccordionIndex = 3;
+                }
+                else if (strAccordionID == "Maintenance") {
+                    intAccordionIndex = 4;
+                }
+
+                $('#main_menu').accordion("activate", intAccordionIndex);
+            }
+        }
+
+        activateAccordion("<?php echo $this->AccordionID;?>");
+
+    </script>
+</html>

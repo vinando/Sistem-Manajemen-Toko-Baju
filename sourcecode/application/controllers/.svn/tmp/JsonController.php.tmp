@@ -1,0 +1,287 @@
+<?php
+
+class JsonController extends Zend_Controller_Action {
+
+    public function init() {
+    }
+
+    public function indexAction(){
+        $strType = $this->getRequest()->getParam("method");
+        switch ($strType) {
+            case "refresh_list":
+                $strBranchID         = $this->getRequest()->getParam("branch");
+                $strTicketCategoryID = $this->getRequest()->getParam("category");
+                $strCounterNo        = $this->getRequest()->getParam("counter");
+
+                //$arrFinalResult;
+
+                // Get waiting list
+                $model = new Application_Model_Ticket();
+                $arrResultList = $model->getAllQueuingByTransfered($strTicketCategoryID, $strBranchID, "no", "queued");
+                $arrTransferedList = $model->getAllQueuingByTransfered($strTicketCategoryID, $strBranchID, "yes", "queued");
+                if (count($arrTransferedList) > 0) {
+                    foreach ($arrTransferedList as $arrTransfered) {
+                        if (count($arrResultList) > 1) {
+                            $blnMatch = false;
+                            foreach ($arrResultList as $i => $arrResult) {
+                                if ($arrResult["TicketNo"] >= $arrTransfered["TransferNo"]) {
+                                    array_splice($arrResultList, $i, 0, array($arrTransfered));
+                                    $blnMatch = true;
+                                    break;
+                                }
+                            }
+
+                            if (!$blnMatch) {
+                                array_push($arrResultList, $arrTransfered);
+                            }
+                        } else {
+                            array_push($arrResultList, $arrTransfered);
+                        }
+                    }
+                }
+                $arrFinalResult["waiting"] = $arrResultList;
+
+                // Get no show list
+                $arrResultList = $model->getAllPostponed($strTicketCategoryID, $strBranchID, $strCounterNo);
+                $arrTransferedList = $model->getAllQueuingByTransfered($strTicketCategoryID, $strBranchID, "yes", "postponed");
+                if (count($arrTransferedList) > 0) {
+                    foreach ($arrTransferedList as $arrTransfered) {
+                        if (count($arrResultList) > 1) {
+                            $blnMatch = false;
+                            foreach ($arrResultList as $i => $arrResult) {
+                                if ($arrResult["TicketNo"] >= $arrTransfered["TransferNo"]) {
+                                    array_splice($arrResultList, $i, 0, array($arrTransfered));
+                                    $blnMatch = true;
+                                    break;
+                                }
+                            }
+
+                            if (!$blnMatch) {
+                                array_push($arrResultList, $arrTransfered);
+                            }
+                        } else {
+                            array_push($arrResultList, $arrTransfered);
+                        }
+                    }
+                }
+                $arrFinalResult["no_show"] = $arrResultList;
+
+                // Get PDT
+                if ($_SESSION["Setting"]["PDTTicketCategoryID"]) {
+                    $arrQueued     = $model->getAllQueuingByTransfered($_SESSION["Setting"]["PDTTicketCategoryID"], $strBranchID, "no", "queued");
+                    $arrTransfered = $model->getAllQueuingByTransfered($_SESSION["Setting"]["PDTTicketCategoryID"], $strBranchID, "yes", "queued");
+
+                    // Check counter session
+                    $modelCounterSession = new Application_Model_Countersession();
+                    $arrSession = $modelCounterSession->getActiveFrontlinersByBranchByTicketCategory($strBranchID, $_SESSION["Setting"]["PDTTicketCategoryID"], date("Y-m-d H:i:s"));
+                    //var_dump($arrSession);
+                    if ($arrSession) {
+                        $arrFinalResult["pdt"] = 0;
+                    } else {
+                        $arrFinalResult["pdt"] = count($arrQueued) + count($arrTransfered);
+                    }
+                }
+
+                echo json_encode($arrFinalResult);
+                exit;
+                break;
+
+            case "call_customer":
+                $strTicketID         = $this->getRequest()->getParam("ticket");
+                $strBranchID         = $this->getRequest()->getParam("branch");
+                $strTicketCategoryID = $this->getRequest()->getParam("category");
+                $strCounterNo        = $this->getRequest()->getParam("counter");
+
+                $modelTicket = new Application_Model_Ticket();
+
+                $arrTicket = $modelTicket->getSingleByTicketID($strTicketID, $strTicketCategoryID, $strBranchID, "queued");
+
+                $strTicketNo = $arrTicket["TicketNo"];
+
+                if ($arrTicket["TicketID"]) {
+                    // Get branch current time accoding to timezone
+                    $strCurrTime = date("Y-m-d H:i:s", strtotime(date("Y-m-d H:i:s")) - ((7 - $_SESSION['BranchTimeZone']) * 3600));
+
+                    $modelTicket->updateCalledDate($arrTicket["TicketID"], $strCounterNo, $strCurrTime);
+                    echo json_encode($arrTicket);
+                }
+
+                // Get branch current time accoding to timezone
+                $strCurrTime = date("Y-m-d H:i:s", strtotime(date("Y-m-d H:i:s")) - ((7 - $_SESSION['BranchTimeZone']) * 3600));
+
+                // Notify main display to call this customer
+                $modelCounterCall = new Application_Model_Countercall();
+                $modelCounterCall->insert($strBranchID, $strCounterNo, $strTicketNo, $strCurrTime);
+
+                exit;
+                break;
+
+            case "recall_customer":
+                $strTicketID         = $this->getRequest()->getParam("ticket");
+                $strBranchID         = $this->getRequest()->getParam("branch");
+                $strTicketCategoryID = $this->getRequest()->getParam("category");
+                $strCounterNo        = $this->getRequest()->getParam("counter");
+
+                $model = new Application_Model_Ticket();
+
+                $arrTicket = $model->getSingleByTicketID($strTicketID, $strTicketCategoryID, $strBranchID, "postponed");
+
+                $strTicketNo = $arrTicket["TicketNo"];
+
+                if ($arrTicket["TicketID"]) {
+                    // Get branch current time accoding to timezone
+                    $strCurrTime = date("Y-m-d H:i:s", strtotime(date("Y-m-d H:i:s")) - ((7 - $_SESSION['BranchTimeZone']) * 3600));
+
+                    $model->updateCalledDate($arrTicket["TicketID"], $strCounterNo, $strCurrTime);
+                    echo json_encode($arrTicket);
+                }
+
+                // Notify main display to call this customer
+                $modelCounterCall = new Application_Model_Countercall();
+                // Get branch current time accoding to timezone
+                $strCurrTime = date("Y-m-d H:i:s", strtotime(date("Y-m-d H:i:s")) - ((7 - $_SESSION['BranchTimeZone']) * 3600));
+                $modelCounterCall->insert($strBranchID, $strCounterNo, $strTicketNo, $strCurrTime);
+
+                exit;
+                break;
+
+            case "repeat_call_customer":
+                $strTicketID         = $this->getRequest()->getParam("ticket");
+                $strBranchID         = $this->getRequest()->getParam("branch");
+                $strTicketCategoryID = $this->getRequest()->getParam("category");
+                $strCounterNo        = $this->getRequest()->getParam("counter");
+
+                $modelTicket = new Application_Model_Ticket();
+
+                $arrTicket = $modelTicket->getSingleByTicketID($strTicketID, $strTicketCategoryID, $strBranchID, "called");
+
+                $strTicketNo = $arrTicket["TicketNo"];
+
+                if ($arrTicket["TicketID"]) {
+                    echo json_encode($arrTicket);
+                }
+
+                // Notify main display to call this customer
+                $modelCounterCall = new Application_Model_Countercall();
+                $modelCounterCall->insert($strBranchID, $strCounterNo, $strTicketNo);
+
+                exit;
+                break;
+
+            case "next_customer":
+                $strTicketID             = $this->getRequest()->getParam("ticket");
+                $strServiceType1         = $this->getRequest()->getParam("service_type1");
+                $strServiceType2         = $this->getRequest()->getParam("service_type2");
+                $strServiceType3         = $this->getRequest()->getParam("service_type3");
+                $strWalkinName           = $this->getRequest()->getParam("walkin_name");
+                $strRelationWithCustomer = $this->getRequest()->getParam("relation_with_customer");
+                $strNoAgreement          = $this->getRequest()->getParam("no_agreement");
+
+                $model = new Application_Model_Ticket();
+
+                // Get branch current time accoding to timezone
+                $strCurrTime = date("Y-m-d H:i:s", strtotime(date("Y-m-d H:i:s")) - ((7 - $_SESSION['BranchTimeZone']) * 3600));
+
+                $model->updateStatusFinished($strTicketID, $strServiceType1, $strServiceType2, $strServiceType3, $strWalkinName, $strRelationWithCustomer, $strNoAgreement, $strCurrTime);
+
+                echo json_encode(array("message" => "ok"));
+
+                exit;
+                break;
+
+            case "transfer_customer":
+                $strTicketID         = $this->getRequest()->getParam("ticket");
+                $strTicketCategoryID = $this->getRequest()->getParam("category");
+                $strBranchID         = $this->getRequest()->getParam("branch");
+
+                $model = new Application_Model_Ticket();
+
+                // Get destination waiting list
+                $arrWaitingList = $model->getAllQueuing($strTicketCategoryID, $strBranchID);
+                //var_dump($arrWaitingList);
+                $intWaitingList = count($arrWaitingList);
+
+                if ($intWaitingList > 2) {
+                    $intTransferNo = $arrWaitingList[2]["TicketNo"];
+                } else {
+                    if ($intWaitingList > 0) {
+                        $intTransferNo = $arrWaitingList[$intWaitingList - 1]["TicketNo"] + 1;
+                    } else {
+                        $intTransferNo = 1;
+                    }
+                }
+
+                //echo $intTransferNo;exit;
+
+                $model->updateTransfered($strTicketID, $strTicketCategoryID, $intTransferNo);
+
+                echo json_encode(array("message" => "ok"));
+
+                exit;
+                break;
+
+            case "noshow_customer":
+                $strTicketID    = $this->getRequest()->getParam("ticket");
+
+                $model = new Application_Model_Ticket();
+
+                $model->updateStatusPostponed($strTicketID);
+
+                echo json_encode(array("message" => "ok"));
+                exit;
+                break;
+
+            case "take_ticket":
+                $strBrachID          = $this->getRequest()->getParam("branch");
+                $strTicketCategoryID = $this->getRequest()->getParam("category");
+                $strDate             = $this->getRequest()->getParam("date");
+
+                // Get branch current time accoding to timezone
+                $strCurrTime = date("Y-m-d H:i:s", strtotime(date("Y-m-d H:i:s")) - ((7 - $_SESSION['BranchTimeZone']) * 3600));
+
+                $model = new Application_Model_Ticket();
+                $strTicketID = $model->insert($strBrachID, $strTicketCategoryID, $strDate, $strCurrTime);
+
+                $arrTicket = $model->getSingle($strTicketID);
+
+                echo json_encode(array("message" => "ok", "ticket_no" => $arrTicket["TicketNo"], "date" => date("d-m-Y", strtotime($strCurrTime)), "time" => date("H:i:s", strtotime($strCurrTime))));
+                exit;
+                break;
+
+            case "acmp_ticket_category":
+                $strKeyword = $this->getRequest()->getParam("term");
+
+                $model = new Application_Model_Ticketcategory();
+
+                if (!$strKeyword) {
+                    $arrResult = array();
+                } else {
+                    $arrResult = $model->getAllByKeyword($strKeyword);
+                }
+
+                echo json_encode(array("category" => $arrResult));
+                exit;
+                break;
+
+            case "get_maindisplay_queue":
+                $strBrachID = $this->getRequest()->getParam("branch");
+
+                $arrResult = array();
+
+                $modelCounterCall = new Application_Model_Countercall();
+                $arrResult["Calling"] = $modelCounterCall->getSingleLatestByBranchID($strBrachID);
+
+                $modelTicket = new Application_Model_Ticket();
+                $arrResult['Counters'] = $modelTicket->getAllCalled($strBrachID);
+
+                echo json_encode($arrResult);
+
+                // update calling status
+                $modelCounterCall->updateStatus($arrResult["Calling"]["CallID"], "called");
+                exit;
+                break;
+        }
+        exit;
+    }
+}
+

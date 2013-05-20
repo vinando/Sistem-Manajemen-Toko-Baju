@@ -1,0 +1,199 @@
+<?php
+
+class UserController extends Zend_Controller_Action {
+    private $model;
+
+    public function init() {
+        $this->model = new Application_Model_User();
+        
+        $this->view->AccordionID  = "Master";
+        $this->view->SelectedMenu = "User";
+    }
+
+    public function preDispatch() {
+    	if (!Zend_Auth::getInstance()->hasIdentity()) {
+    	    $this->_helper->redirector('login', '');
+        }
+    }
+
+    public function indexAction(){
+    	$dataTable = $this->model->getDataTable();
+    	//echo json_encode($dataTable);
+    }
+
+    public function dataAction() {
+        echo json_encode($this->model->getDataTable());
+    	exit;
+    }
+
+    public function formAction(){
+        switch ($this->getRequest()->getParam("type")) {
+            case "add";
+                $this->view->assign("strFormType", "Add");
+                $this->view->assign("strID", "");
+                $this->view->assign("Rights", array("rights"));
+                break;
+
+            case "edit":
+                $this->view->assign("strFormType", "Edit");
+                $this->view->assign("strID", $this->getRequest()->getParam("id"));
+
+                $arrData = $this->model->getSingle($this->getRequest()->getParam("id"));
+                $arrRightsTmp = $this->model->getAllRightsByUserID($this->getRequest()->getParam("id"));
+                $arrRights = array("rights");
+                if (count($arrRightsTmp) > 0) {
+                    foreach ($arrRightsTmp as $arrRightTmp) {
+                        array_push($arrRights, $arrRightTmp["Controller"]);
+                    }
+                }
+
+                // Set record data to form
+                $this->view->assign("FullName", $arrData['FullName']);
+                $this->view->assign("Email", $arrData['Email']);
+                $this->view->assign("BranchID", $arrData['BranchID']);
+                $this->view->assign("Rights", $arrRights);
+                break;
+        }
+
+        $model = new Application_Model_Branch();
+        $this->view->assign("Branches", $model->getAll());
+
+    }
+
+    public function saveAction() {
+        switch ($this->getRequest()->getParam("type")) {
+            case "Add":
+                // Check empty fields
+                if (!$this->getRequest()->getParam("ID") OR
+                        !$this->getRequest()->getParam("FullName") OR
+                        !$this->getRequest()->getParam("Email") OR
+                        !$this->getRequest()->getParam("Password") OR
+                        !$this->getRequest()->getParam("ConfirmPassword")
+                ) {
+                    echo "<script>window.parent.saveFailed('Please fill all required fields!')</script>";
+                    break;
+                }
+
+                // Check Invalid characters
+                if (preg_match("/[^\d\w\\-_]+/", $this->getRequest()->getParam("ID"))) {
+                    echo "<script>window.parent.saveFailed('Please use only alphanumeric on ID!')</script>";
+                    break;
+                }
+
+                // Check Invalid characters
+                if (preg_match("/[^\s\d\w]+/", $this->getRequest()->getParam("FullName"))) {
+                    echo "<script>window.parent.saveFailed('Please use only alphanumeric on Full Name!')</script>";
+                    break;
+                }
+
+                // Check Invalid characters
+                if (preg_match("/[^\d\w\\-_@.]+/", $this->getRequest()->getParam("Email"))) {
+                    echo "<script>window.parent.saveFailed('Please use only alphanumeric on Email!')</script>";
+                    break;
+                }
+
+                // Check Invalid characters
+                if (preg_match("/[^\d\w]+/", $this->getRequest()->getParam("Password"))) {
+                    echo "<script>window.parent.saveFailed('Please use only alphanumeric on Password!')</script>";
+                    break;
+                }
+
+                // Check Password and Confirm Password
+                if ($this->getRequest()->getParam("Password") != $this->getRequest()->getParam("ConfirmPassword")) {
+                    echo "<script>window.parent.saveFailed('Password and Confirm password do not match!')</script>";
+                    break;
+                }
+
+                // Check duplicate user id
+                $arrUser = $this->model->getSingle($this->getRequest()->getParam("ID"));
+                if ($arrUser["UserID"] == $this->getRequest()->getParam("ID")) {
+                    echo "<script>window.parent.saveFailed('UserID already exist!')</script>";
+                    break;
+                }
+
+                // Insert details
+                $this->model->insert(addslashes($this->getRequest()->getParam("ID")),
+                        addslashes($this->getRequest()->getParam("Password")),
+                        addslashes($this->getRequest()->getParam("FullName")),
+                        addslashes($this->getRequest()->getParam("Email")),
+                        addslashes($this->getRequest()->getParam("BranchID"))
+                );
+
+                // Insert rights
+                $this->model->deleteRightsByUserID($this->getRequest()->getParam("ID"));
+                if (count($this->getRequest()->getParam("Rights")) > 0) {
+                    $arrRights = $this->getRequest()->getParam("Rights");
+                    foreach ($arrRights as $i => $strController) {
+                        $this->model->insertRights($this->getRequest()->getParam("ID"), $strController);
+                    }
+                }
+
+                echo "<script>window.parent.saveSuccess('ID', '" . $this->getRequest()->getParam("ID") . "');window.parent.disableField('ID')</script>";
+                break;
+
+            case "Edit":
+                // Check empty fields
+                if (!$this->getRequest()->getParam("ID") OR
+                        !$this->getRequest()->getParam("FullName") OR
+                        !$this->getRequest()->getParam("Email")
+                ) {
+                    echo "<script>window.parent.saveFailed('Please fill all required fields!')</script>";
+                    break;
+                }
+
+                // Check Invalid characters
+                if (preg_match("/[^\s\d\w]+/", $this->getRequest()->getParam("FullName"))) {
+                    echo "<script>window.parent.saveFailed('Please use only alphanumeric on Full Name!')</script>";
+                    break;
+                }
+
+                // Check Invalid characters
+                if (preg_match("/[^\d\w@\\-_.]+/", $this->getRequest()->getParam("Email"))) {
+                    echo "<script>window.parent.saveFailed('Please use only alphanumeric on Email!')</script>";
+                    break;
+                }
+
+                // Check Invalid characters
+                if ($this->getRequest()->getParam("Password") and preg_match("/[^\d\w]+/", $this->getRequest()->getParam("Password"))) {
+                    echo "<script>window.parent.saveFailed('Please use only alphanumeric on Password!')</script>";
+                    break;
+                }
+
+                // Check Password and Confirm Password
+                if ($this->getRequest()->getParam("Password")) {
+                    if ($this->getRequest()->getParam("Password") != $this->getRequest()->getParam("ConfirmPassword")) {
+                        echo "<script>window.parent.saveFailed('Password and Confirm password do not match!')</script>";
+                        break;
+                    }
+                }
+
+                // Update details
+                $this->model->update(addslashes($this->getRequest()->getParam("ID")),
+                        addslashes($this->getRequest()->getParam("Password")),
+                        addslashes($this->getRequest()->getParam("FullName")),
+                        addslashes($this->getRequest()->getParam("Email")),
+                        addslashes($this->getRequest()->getParam("BranchID"))
+                );
+
+                // Update rights
+                $this->model->deleteRightsByUserID($this->getRequest()->getParam("ID"));
+                if (count($this->getRequest()->getParam("Rights")) > 0) {
+                    $arrRights = $this->getRequest()->getParam("Rights");
+                    print_r($arrRights);
+                    foreach ($arrRights as $i => $strController) {
+                        $this->model->insertRights($this->getRequest()->getParam("ID"), $strController);
+                    }
+                }
+
+                echo "<script>window.parent.editSuccess()</script>";
+                break;
+
+            case "Delete":
+                $this->model->delete(addslashes($this->getRequest()->getParam("ID")));
+                break;
+        }
+        exit;
+
+    }
+}
+

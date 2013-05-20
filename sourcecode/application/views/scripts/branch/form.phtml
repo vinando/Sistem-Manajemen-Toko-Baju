@@ -1,0 +1,73 @@
+<style>
+	#available_selectable .ui-selecting { background: #FECA40; }
+	#available_selectable .ui-selected { background: #F39814; color: white; }
+	#available_selectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+
+	#assigned_selectable .ui-selecting { background: #FECA40; }
+	#assigned_selectable .ui-selected { background: #F39814; color: white; }
+	#assigned_selectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+</style>
+
+<div id="content_header"><h2>Master - Branch</h2><div style="float:right"><h2 id="form_type"><?php echo $this->strFormType;?> Record</h2></div></div>
+<hr>
+
+<form id="form" method="POST" action="/branch/save" class="form_element" enctype="multipart/form-data" target="form_iframe">
+
+    <table id="table_form">
+        <tr>
+            <td>Branch ID</td>
+            <td><input type="text" name="ID" id="ID" size="20" readonly value="<?php echo $this->strID;?>" class="<?php if ($this->strFormType == "Edit") {echo "readonly ";}?>text"></td>
+        </tr>
+        <tr>
+            <td>Branch Code * </td>
+            <td><input type="text" name="BranchCode" id="BranchCode" size="10" size="10" value="<?php echo $this->BranchCode ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Branch Name * </td>
+            <td><input type="text" name="BranchName" id="BranchName" size="50" value="<?php echo $this->BranchName ?>" class="text required"></td>
+        </tr>
+    </table>
+
+<hr>
+<div id="form_save_result" class="form_save_success">Save successful</div>
+<input type="hidden" name="type" id="type" value="<?php echo $this->strFormType; ?>">
+<input type="submit" value="Save" id="btn_save" class="button">
+<input type="button" value="New" id="btn_new" class="button" onclick="window.location='/branch/form/type/add'">
+<input type="button" value="Delete" id="btn_delete" class="button">
+<input type="button" value="Close" id="btn_close" onclick="window.location='/branch'" class="button">
+</form>
+<iframe id="form_iframe" name="form_iframe" src="" style="width:100%;height:100px;border:0px solid #FFFFFF;"></iframe>
+
+<div id="dialog-modal" title="Attention" style="display:none"></div>
+
+<div id="dialog-confirm" title="Delete record?" style="display:none">
+	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This record will be permanently deleted and cannot be recovered. Are you sure?</p>
+</div>
+<script>
+    $('#btn_delete').click(function() {
+        if ($('#type').val() == "Add") {
+            return;
+        }
+
+    	$( "#dialog-confirm" ).dialog({
+    		resizable: false,
+    		height:200,
+    		modal: true,
+    		buttons: {
+    			"Delete record": function() {
+    				$( this ).dialog("close");
+    				$.get("/branch/save/type/Delete/ID/" + $('#ID').val(), function() {
+    				    window.location = '/branch';
+    				});
+    			},
+    			Cancel: function() {
+    				$( this ).dialog("close");
+    			}
+    		}
+    	});
+    });
+
+    var strBranchID = $('#ID').val();
+
+    $("#form").validate();
+</script>

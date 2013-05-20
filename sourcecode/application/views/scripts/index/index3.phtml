@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <link type="text/css" href="/css/smoothness/jquery-ui-1.8.19.custom.css" rel="Stylesheet" />
+        <link type="text/css" href="/css/jquery.dataTables.css" rel="Stylesheet" />
+        <link type="text/css" href="/css/jquery.dataTables_themeroller.css" rel="Stylesheet" />
+        <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+        <script type="text/javascript" src="/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/js/jquery.dataTables.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                    $('#main_menu').accordion({autoHeight: false});
+                    $('#table_list').dataTable({
+                        "bJQueryUI": true,
+                        "sPaginationType": "full_numbers",
+                        "sAjaxSource": "index3data"
+                    });
+            });
+        </script>
+        <style>
+            html, body {
+                width:100%;
+                height:100%;
+                margin:0px;
+                font-size:12px;
+                font-family:verdana;
+            }
+
+            #main_container {
+                width:100%;
+                height:100%;
+                border:1px solid grey;
+            }
+
+            #pane_left {
+                width:230px;
+                text-align:top;
+                border:1px solid grey;
+            }
+
+            #pane_top {
+                height:80px;
+                border:1px solid grey;
+                border:1px solid grey;
+                padding:5px;
+            }
+
+            #pane_center {
+                border:1px solid grey;
+                border:1px solid grey;
+                padding:5px;
+                vertical-align:top;
+            }
+
+            #pane_bottom {
+                height:30px;
+                border:1px solid grey;
+                border:1px solid grey;
+                padding:5px;
+            }
+
+            #main_menu {
+                vertical-align:top;
+                height:100%;
+            }
+
+            .main_menu {
+                list-style-type:square;
+                list-style-position:inside;
+                padding:0px;
+            }
+
+            .menu_header {
+                font-weight:bold;
+            }
+
+            .main_menu_item {
+                padding:5px 0px 5px 0px;
+            }
+
+            #content_header {
+                font-size:15px;
+                font-weight:bold;
+                padding-bottom:5px;
+                width:100%;
+            }
+        </style>
+    </head>
+    <body>
+        <table width="100%" height="100%" id="main_container">
+          <tr>
+            <td colspan="2" id="pane_top">Header</td>
+          </tr>
+          <tr>
+            <td id="pane_left">
+                <div id="main_menu">
+                    <h3><a href="#" class="menu_header">Master</a></h3>
+                    <div>
+                        <ul class="main_menu">
+                            <li class="main_menu_item">User</li>
+                            <li class="main_menu_item">User Roles</li>
+                            <li class="main_menu_item">Branches</li>
+                            <li class="main_menu_item">Branches Media</li>
+                            <li class="main_menu_item">Branches Media</li>
+                        </ul>
+                    </div>
+                    <h3><a href="#" class="menu_header">Reporting</a></h3>
+                    <div>
+                        <ul class="main_menu">
+                            <li class="main_menu_item">Traffic Report</li>
+                            <li class="main_menu_item">User Roles</li>
+                            <li class="main_menu_item">Branches</li>
+                            <li class="main_menu_item">Branches Media</li>
+                            <li class="main_menu_item">Branches Media</li>
+                        </ul>
+                    </div>
+                    <h3><a href="#" class="menu_header">Maintenance</a></h3>
+                    <div>
+                        <ul class="main_menu">
+                            <li class="main_menu_item">Export data</li>
+                        </ul>
+                    </div>
+                    <h3><a href="#" class="menu_header">Account</a></h3>
+                    <div>
+                        <ul class="main_menu">
+                            <li class="main_menu_item">Change Password</li>
+                            <li class="main_menu_item">Logout</li>
+                        </ul>
+                    </div>
+                </div>
+            </td>
+            <td height="100%" id="pane_center">
+                <div id="content_header">Master - Content<div style="float:right"><input type="button" value="Create New Record" onclick="window.location='index3add'"></div></div>
+                <table id="table_list">
+                    <thead>
+                        <tr>
+                            <td>Name</td>
+                            <td>Address</td>
+                            <td>Phone</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Rizal Saputra</td>
+                            <td>JL.Buncis 3 No.16 Perum Bojong Indah, Rawabuaya</td>
+                            <td>083871024750</td>
+                        </tr>
+                        <tr>
+                            <td>Andika Dwi Sentosa</td>
+                            <td>JL.Perikanan Ujung No.20 Pancoranmas</td>
+                            <td>083871024750</td>
+                        </tr>
+                        <tr>
+                            <td>Ivan Novendry</td>
+                            <td>JL.Perikanan Ujung No.20 Pancoranmas</td>
+                            <td>083871024750</td>
+                        </tr>
+                        <tr>
+                            <td>Ricky Maulana</td>
+                            <td>JL.Pondok Gede Raya No.39 Pondok Gede</td>
+                            <td>083871024750</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" id="pane_bottom">Footer</td>
+          </tr>
+        </table>
+    </body>
+</html>

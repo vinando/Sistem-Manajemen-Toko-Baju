@@ -1,0 +1,79 @@
+<div id="content_header"><h2>Reporting - Detail Gaji Pegawai</h2></div>
+<hr>
+<?php
+//print_r($this->data);
+echo '<br/>';
+echo 'Period Report: <b>'.$this->startdate. '</b> to <b>'.$this->enddate.'</b><br/>';
+echo 'Branch       : <b>'.$this->branch['name']. '</b><br/>';
+echo 'Employee     : <b>'.$this->employee['name']. '</b>';
+echo '<br/>';
+//echo count($this->data);
+?>
+<table id="table_list" width="100%" cellspacing="1" cellpadding="5">
+    <thead>
+    <tr bgcolor="#FFFFFF">
+        <td colspan="12">&nbsp;</td>
+    </tr>
+    </thead>
+    <tbody>
+    <tr bgcolor="#d6d6d6">
+        <td align="center" width="10">No.</td>
+        <td align="center" width="100">Order No.</td>
+        <td align="center" width="100">Finish Date</td>
+        <td align="center" width="100">Finish No.</td>
+        <td align="center" width="200">Product</td>
+        <td align="center" width="50">Qty.</td>
+        <td align="center" width="50">Salary</td>
+        <td align="center" width="50">Sub-Total</td>
+    </tr>
+    <?php
+    if(count($this->data) > 0){
+        $i = 0;
+        $grandTotal = 0;
+        foreach ($this->data as $idx => $dataDetail){
+            $i++;
+            $grandTotal += $dataDetail['total'];
+            if($i%2 == 0) $bgcolor = "#e6e6fa";
+            else $bgcolor = "#f1f0f0";
+            ?>
+        <tr bgcolor="<?php echo $bgcolor; ?>">
+            <td align="left"><?php echo $i; ?></td>
+            <td align="left"><?php echo $dataDetail['orderno']; ?></td>
+            <td align="left"><?php echo $dataDetail['finishdate']; ?></td>
+            <td align="right"><?php echo $dataDetail['finishno']; ?></td>
+            <td align="right"><?php echo $dataDetail['name']; ?></td>
+            <td align="right"><?php echo $dataDetail['amount']; ?></td>
+            <td align="right"><?php echo $dataDetail['salary']; ?></td>
+            <td align="right"><?php echo $dataDetail['total']; ?></td>
+        </tr>
+            <?php
+        }
+        ?>
+        <tr bgcolor="#f1f0f0" style="color : red;">
+            <td align="right" colspan="8">Total Gaji : <b><?php echo $grandTotal;?></b></td>
+        </tr>
+        <?php
+    }
+    else{
+        ?>
+    <tr bgcolor="#f1f0f0" style="color : red;">
+        <td align="center" colspan="7"><b>No data to display</b></td>
+    </tr>
+        <?php
+    }
+    ?>
+    </tbody>
+</table>
+<br/><br/>
+<script type="text/javascript">
+    function showDetail(branchid, employeeid) {
+        url = '/rptgaji/viewdetail/branchid/' + branchid + '/employeeid/' + employeeid + '/startdate/<?php echo $this->startdate; ?>/enddate/<?php echo $this->enddate; ?>';
+        $('#detailDialog').load(url).dialog({
+            modal   : true,
+            width   : 800,
+            height  : 600,
+            button  : 'close'
+        });
+        return false;
+    }
+</script>

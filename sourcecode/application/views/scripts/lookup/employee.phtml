@@ -1,0 +1,37 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#table_list_employee').dataTable({
+            "bJQueryUI": true,
+            "bServerSide": true,
+            "sServerMethod": "POST",
+            "sPaginationType": "full_numbers",
+            "sAjaxSource": "/lookup/dataemployee"
+        });
+
+        $('#table_list_employee tbody tr').live('dblclick', function () {
+            nTds = $('td', this);
+            strEmployeeID = $(nTds[0]).text();
+            strEmployeeName = $(nTds[4]).text();
+
+            $('#EmployeeId').val(strEmployeeID);
+            $('#EmployeeName').val(strEmployeeName);
+            $('#lookup').dialog('close');
+        });
+    });
+</script>
+<h1>Employee Lookup</h1>
+
+<table id="table_list_employee">
+    <thead>
+    <tr>
+        <td>Employee ID</td>
+        <td>Branch ID</td>
+        <td>Type</td>
+        <td>Employee Code</td>
+        <td>Employee Name</td>
+        <td>Salary</td>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>

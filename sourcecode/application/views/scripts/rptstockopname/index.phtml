@@ -1,0 +1,87 @@
+<style>
+    #branch_available .ui-selecting { background: #FECA40; }
+    #branch_available .ui-selected { background: #F39814; color: white; }
+    #branch_available { list-style-type: none; margin: 0; padding: 0; width: 100%; }
+    #branch_available li { margin: 3px; padding: 0.4em; font-size: 1.2em; height: 18px; }
+
+    #branch_selected .ui-selecting { background: #FECA40; }
+    #branch_selected .ui-selected { background: #F39814; color: white; }
+    #branch_selected { list-style-type: none; margin: 0; padding: 0; width: 100%; }
+    #branch_selected li { margin: 3px; padding: 0.4em; font-size: 1.2em; height: 18px; }
+</style>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#branch_available").selectable({
+            stop: function() {
+                $( ".ui-selected", this ).each(function() {
+                    var index = $( "#branch_available li" ).index(this);
+                    //alert((index + 1));
+                });
+            }
+        });
+
+        $("#branch_selected").selectable({
+            stop: function() {
+                $( ".ui-selected", this ).each(function() {
+                    var index = $( "#branch_selected li" ).index(this);
+                    //alert((index + 1));
+                });
+            }
+        });
+        $('#btnAdd').click(function() {
+            $('#branch_available .ui-selected').appendTo('#branch_selected');
+        });
+        $('#btnRemove').click(function() {
+            $('#branch_selected .ui-selected').appendTo('#branch_available');
+        });
+        $('#btnSubmit').click(function(){
+            var branchids = $('#branch_selected li').map(function() {
+                return $(this).data('branchid');
+            });
+            var startdate = $('#StartDate').val();
+            var enddate = $('#EndDate').val();
+            window.location = '/rptstockopname/viewresult/branchids/' + branchids.toArray().join(',');
+        });
+    });
+</script>
+<div id="content_header"><h2>Report - Biaya Operasioan</h2></div>
+<hr>
+<form id="form" method="POST" action="/rptstockopname/viewresult" class="form_element" enctype="multipart/form-data" target="form_iframe">
+    <table id="table_form">
+        <tr>
+            <td align="center" width="300">
+                Branchs Available:<br>
+                <div id="box_branch_available" class="box-selectable">
+                    <ol id="branch_available">
+                        <?php
+                        foreach ($this->branchs as $branch){
+                            ?>
+                            <li class="ui-widget-content" data-branchid="<?php echo $branch['id'];?>"><?php echo $branch['code']. '|' . $branch['name'];?></li>
+                            <?php
+                        }
+                        ?>
+                    </ol>
+                </div>
+            </td>
+            <td align="center" width="100">
+                <input type="button" value=">>>>" id="btnAdd" class="button"><br/>
+                <input type="button" value="<<<<" id="btnRemove" class="button">
+            </td>
+            <td align="center" width="300">
+                Selected Branchs:<br>
+                <div id="box_branch_selected" class="box-selectable">
+                    <ol id="branch_selected">
+
+                    </ol>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3" align="right">
+                <input type="button" value="Submit" id="btnSubmit" class="button">
+                <input type="button" value="Close" id="btnClose" onclick="window.location='/home'" class="button">
+            </td>
+        </tr>
+    </table>
+</form>
+<iframe id="form_iframe" name="form_iframe" src="" style="width:200;height:200;border:0px solid #FFFFFF;"></iframe>

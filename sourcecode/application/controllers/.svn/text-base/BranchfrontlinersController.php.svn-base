@@ -1,0 +1,101 @@
+<?php
+
+class BranchfrontlinersController extends Zend_Controller_Action {
+    private $model;
+
+    public function init() {
+        $this->model = new Application_Model_Branchfrontliners();
+        $this->view->AccordionID  = "Master";
+        $this->view->SelectedMenu = "BranchFrontliners";
+    }
+
+    public function preDispatch() {
+    	if (!Zend_Auth::getInstance()->hasIdentity()) {
+    	    $this->_helper->redirector('login', '');
+        }
+    }
+
+    public function indexAction(){
+    }
+
+    public function dataAction() {
+        echo json_encode($this->model->getDataTable());
+    	exit;
+    }
+
+    public function formAction(){
+        switch ($this->getRequest()->getParam("type")) {
+            case "add";
+                $this->view->assign("strFormType", "Add");
+                break;
+
+            case "edit":
+                $this->view->assign("strFormType", "Edit");
+                $this->view->assign("BranchID", $this->getRequest()->getParam("branch_id"));
+                $this->view->assign("UserID", $this->getRequest()->getParam("user_id"));
+
+                $arrData = $this->model->getSingle($this->getRequest()->getParam("branch_id"), $this->getRequest()->getParam("user_id"));
+                break;
+        }
+
+        $model = new Application_Model_Branch();
+        $this->view->assign("Branches", $model->getAll());
+
+        $model = new Application_Model_User();
+        $this->view->assign("Users", $model->getAll());
+    }
+
+    public function saveAction() {
+        switch ($this->getRequest()->getParam("type")) {
+            case "Add":
+                // Check empty fields
+                if (!$this->getRequest()->getParam("BranchID") or !$this->getRequest()->getParam("UserID")) {
+                    echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                    exit;
+                }
+
+                // Check duplicate UserID
+                $result = $this->model->getSingle($this->getRequest()->getParam("BranchID"), $this->getRequest()->getParam("UserID"));
+                if ($result["UserID"] == $this->getRequest()->getParam("UserID")) {
+                    echo "<script>window.parent.saveFailed('User ID already exist!')</script>";
+                    break;
+                }
+
+                $this->model->insert(
+                        addslashes($this->getRequest()->getParam("BranchID")),
+                        addslashes($this->getRequest()->getParam("UserID"))
+                );
+
+                echo "<script>window.parent.saveSuccess();window.parent.disableField('BranchID');window.parent.disableField('UserID')</script>";
+                break;
+
+            case "Edit":
+                // Check empty fields
+                if (!$this->getRequest()->getParam("BranchID") or !$this->getRequest()->getParam("UserID")) {
+                    echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                    exit;
+                }
+
+                $this->model->update(
+                        addslashes($this->getRequest()->getParam("BranchID")),
+                        addslashes($this->getRequest()->getParam("UserID"))
+                );
+                echo "<script>window.parent.editSuccess()</script>";
+                break;
+
+            case "Delete":
+                $this->model->delete(addslashes($this->getRequest()->getParam("branch_id")), addslashes($this->getRequest()->getParam("user_id")));
+                break;
+        }
+        exit;
+
+    }
+
+    public function getfrontlinersAction() {
+        $modelUser = new Application_Model_User();
+        $arrFrontliners = $modelUser->getAllByBranchID($this->getRequest()->getParam("branch"));
+        echo json_encode($arrFrontliners);
+        exit;
+    }
+}
+

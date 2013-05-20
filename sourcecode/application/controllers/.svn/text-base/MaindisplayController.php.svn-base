@@ -1,0 +1,114 @@
+<?php
+
+class MaindisplayController extends Zend_Controller_Action {
+    private $model;
+    private $layout;
+    private $strBranchID;
+
+    public function init() {
+        $this->model = new Application_Model_Ticket();
+        $helper = $this->_helper->getHelper('Layout');
+        $layout = $helper->getLayoutInstance();
+        $layout->setLayout("layout_external");
+        $this->strBranchID = $this->getRequest()->getParam("branch");
+    }
+
+    public function indexAction(){
+        // Set timezone in session
+        $modelBranch = new Application_Model_Branch();
+        $arrBranch = $modelBranch->getSingle($this->strBranchID);
+        $_SESSION['BranchTimeZone'] = $arrBranch['BranchTimeZone'];
+
+        $this->_helper->layout()->disableLayout();
+        if (!$this->strBranchID) {
+            $this->_helper->redirector('area', 'maindisplay');
+        }
+        $this->view->assign("BranchID", $this->strBranchID);
+
+        $model = new Application_Model_Countercall();
+
+        // Update now calling
+        $arrNowCalling = $model->getSingleLatestByBranchID($this->strBranchID);
+        $this->view->assign("NowCalling", $arrNowCalling);
+
+        // Display other counter
+        $modelCounter = new Application_Model_Branchcounter();
+        $arrCounters = $modelCounter->getAllByBranchID($this->strBranchID);
+        $this->view->assign("Counters", $arrCounters);
+    }
+
+    public function playAction() {
+        $modelMedia = new Application_Model_Branchmedia();
+        $arrMediaList = $modelMedia->getAllVideoByBranchID($this->strBranchID);
+
+        foreach ($arrMediaList as $i => $arrMedia) {
+        	if (!file_exists( "http://localhost/" . $arrMedia["Content"])) {
+        		unset($arrMediaList[$i]);
+        		$arrMediaList = array_values($arrMediaList);
+        	}
+        }
+
+        //var_dump($arrMediaList);exit;
+
+        foreach ($arrMediaList as $i => $arrMedia) {
+            if (!$_SESSION["VideoMediaID"]) {
+                $_SESSION["VideoMediaID"] = $arrMedia["MediaID"];
+                echo "http://localhost/" . $arrMedia["Content"];
+                break;
+            } else {
+                if ($_SESSION["VideoMediaID"] == $arrMedia["MediaID"]) {
+                    if ($i < count($arrMediaList) - 1) {
+                        $_SESSION["VideoMediaID"] = $arrMediaList[$i + 1]["MediaID"];
+                        echo "http://localhost/" . $arrMediaList[$i + 1]["Content"];
+                        break;
+                    } else {
+                        $_SESSION["VideoMediaID"] = $arrMediaList[0]["MediaID"];
+                        echo "http://localhost/" . $arrMediaList[0]["Content"];
+                        break;
+                    }
+                }
+            }
+        }
+        exit;
+    }
+
+    public function textAction() {
+        $modelMedia = new Application_Model_Branchmedia();
+        $arrMediaList = $modelMedia->getAllTextByBranchID($this->strBranchID);
+        $strText = "";
+
+        foreach ($arrMediaList as $i => $arrMedia) {
+        	$strText.= "<img src='/images/separator_logo.jpg' style='height:25px'>&nbsp;" . $arrMedia["Content"] . "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+        }
+        echo $strText;
+
+        //var_dump($arrMediaList);
+
+        /*foreach ($arrMediaList as $i => $arrMedia) {
+            if (!$_SESSION["TextMediaID"]) {
+                $_SESSION["TextMediaID"] = $arrMedia["MediaID"];
+                echo $arrMedia["Content"];
+                break;
+            } else {
+                if ($_SESSION["TextMediaID"] == $arrMedia["MediaID"]) {
+                    if ($i < count($arrMediaList) - 1) {
+                        $_SESSION["TextMediaID"] = $arrMediaList[$i + 1]["MediaID"];
+                        echo $arrMediaList[$i + 1]["Content"];
+                        break;
+                    } else {
+                        $_SESSION["TextMediaID"] = $arrMediaList[0]["MediaID"];
+                        echo $arrMediaList[0]["Content"];
+                        break;
+                    }
+                }
+            }
+        }*/
+        exit;
+    }
+
+    public function areaAction() {
+        $model = new Application_Model_Branch();
+        $this->view->assign("Branches", $model->getAll());
+    }
+}
+

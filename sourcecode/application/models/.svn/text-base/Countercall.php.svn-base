@@ -1,0 +1,53 @@
+<?php
+
+class Application_Model_Countercall {
+	private $sDb;
+
+	function __construct() {
+		$this->sDb = Zend_Registry::get('DB');
+	}
+	function getAll($intLimit = 0, $intOffset = 50) {
+		$strSQL = 'SELECT * FROM trn_counter_call LIMIT '. $intLimit .', '. $intOffset;
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_BOTH);
+		$res = $stmt->fetchAll();
+
+		return $res;
+	}
+
+	function getSingle($strCallID) {
+		$strSQL = "SELECT * FROM trn_counter_call WHERE CallID = '$strCallID'";
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_BOTH);
+		$res = $stmt->fetch();
+		return $res;
+	}
+
+	function getSingleLatestByBranchID($strBranchID) {
+		$strSQL = "SELECT * FROM trn_counter_call WHERE BranchID = '$strBranchID' AND Status = 'waiting' ORDER BY CallID ASC LIMIT 1";
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_BOTH);
+		$res = $stmt->fetch();
+		return $res;
+	}
+
+	function insert($strBrachID, $strCounterNo, $strTicketNo, $strTime) {
+        $strSQL = "INSERT INTO trn_counter_call (BranchID, CounterNo, TicketNo, CreateDate) VALUES ('$strBrachID', '$strCounterNo', '$strTicketNo', '$strTime')";
+        $stmt = $this->sDb->query($strSQL);
+        return $stmt;
+	}
+
+
+	function updateStatus($strCallID, $strStatus) {
+        $strSQL = "UPDATE trn_counter_call SET Status = '$strStatus' WHERE CallID = '$strCallID'";
+        $stmt = $this->sDb->query($strSQL);
+	}
+
+	function delete($strCallID) {
+        $strSQL = "DELETE FROM trn_counter_call WHERE CallID = '$strCallID'";
+        $stmt = $this->sDb->query($strSQL);
+	}
+}
+
+
+?>

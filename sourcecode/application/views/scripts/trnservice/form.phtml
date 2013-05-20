@@ -1,0 +1,355 @@
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#Qty").keydown(function(event) {
+            // Allow: backspace, delete, tab, escape, and enter
+            if ( event.keyCode == 46 || event.keyCode == 8 || event.keyCode == 9 || event.keyCode == 27 || event.keyCode == 13 ||
+                // Allow: Ctrl+A
+                (event.keyCode == 65 && event.ctrlKey === true) ||
+                // Allow: home, end, left, right
+                (event.keyCode >= 35 && event.keyCode <= 39)) {
+                // let it happen, don't do anything
+                return;
+            }
+            else {
+                // Ensure that it is a number and stop the keypress
+                if (event.shiftKey || (event.keyCode < 48 || event.keyCode > 57) && (event.keyCode < 96 || event.keyCode > 105 )) {
+                    event.preventDefault();
+                }
+            }
+        });
+    });
+
+    function loadPrice(){
+        productid = $('#ProductID').val();
+        $.ajax({
+            url: '/trnsalesorder/jsongetproduct/ProductId/' + productid,
+            dataType: 'json',
+            async: false,
+            success: function(data){
+                //alert(data[0].PRIZE);
+                $('#Price').val(data.prize);
+            }
+        });
+        loadTotal();
+    }
+
+    function loadTotal(){
+        var price = $('#Price').val();
+        var qty = $('#Qty').val();
+        if(qty == '') qty = 0;
+        var total = price * qty;
+        $('#dTotal').val(total);
+        //loadGrandTotal();
+    }
+
+    function loadGrandTotal(){
+        numrows = $('#numrows').val();
+        alert(numrows);
+        var grandTotal = 0;
+        for(i=0; i<numrows; i++){
+            if($('#total_' + i).html() != ''){
+                grandTotal += parseInt($('#total_' + i).html());
+            }
+        }
+        //var grandTotal = parseInt($('#total1').val()) + parseInt($('#total2').val()) + parseInt($('#total3').val()) + parseInt($('#total4').val()) + parseInt($('#total5').val());
+        //alert(grandTotal);
+        $('#grandtotal').html( grandTotal );
+        $('#Total').val( grandTotal );
+    }
+</script>
+<div id="content_header"><h2>Transaction - Service</h2><div style="float:right"><h2 id="form_type"><?php echo $this->strFormType;?> Record</h2></div></div>
+<hr>
+
+<form id="form" method="POST" action="/trnservice/save" class="form_element" enctype="multipart/form-data" target="form_iframe">
+
+    <table id="table_form">
+        <tr>
+            <td>Trn. ID</td>
+            <td><input type="text" name="ID" id="ID" size="20" readonly value="<?php echo $this->strID;?>" class="text"></td>
+        </tr>
+        <tr>
+            <td><label for="BranchID">Branch ID</label></td>
+            <td><input type="text" name="BranchID" id="BranchID" size="20" readonly value="<?php echo $_SESSION['BranchID'];?>" class="text"></td>
+        </tr>
+        <tr>
+            <td>Service Type</td>
+            <td><label for="ServiceType"></label>
+                <select name="ServiceType" id="ServiceType" class="required">
+                    <option value="">-- Pilih tipe Service --</option>
+                    <option value="Vermak" <?php echo ($this->ServiceType == 'Vermak') ? 'selected' : '' ?> >Vermak</option>
+                    <option value="Cat Ulang" <?php echo ($this->ServiceType == 'Cat Ulang') ? 'selected' : '' ?> >Cat Ulang</option>
+                    <option value="Dry Clean" <?php echo ($this->ServiceType == 'Dry Clean') ? 'selected' : '' ?> >Dry Clean</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Trn No</td>
+            <td><label for="TrnNo"></label> <input type="text" name="TrnNo" id="TrnNo" size="20" readonly size="10" value="<?php echo ($this->strFormType == 'Edit') ? $this->TrnNo : 'Auto Generate' ?>" class="text"></td>
+        </tr>
+        <tr>
+            <td>Trn Date</td>
+            <td><label for="TrnDate"></label> <input type="text" name="TrnDate" id="TrnDate" size="20" readonly value="<?php echo ($this->strFormType == 'Edit') ? $this->TrnDate : 'Auto Generate' ?>" class="text"></td>
+        </tr>
+        <tr>
+            <td>Customer Name</td>
+            <td>
+                <label for="CustomerId"></label><input type="hidden" name="CustomerId" id="CustomerId" size="20" value="<?php echo ($this->strFormType == 'Edit') ? $this->CustomerId : '' ?>">
+                <label for="CustomerName"></label><input type="text" name="CustomerName" id="CustomerName" size="20" value="<?php echo ($this->strFormType == 'Edit') ? $this->CustomerName : '' ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Telephone</td>
+            <td>
+                <label for="Phone"></label><input type="text" name="Phone" id="Phone" size="20" value="<?php echo ($this->strFormType == 'Edit') ? $this->Phone : '' ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Total</td>
+            <td>
+                <label for="Total"></label><input type="text" name="Total" id="Total" size="20" value="<?php echo ($this->strFormType == 'Edit') ? $this->Total : '' ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>DP</td>
+            <td>
+                <label for="Dp"></label><input type="text" name="Dp" id="Dp" size="20" value="<?php echo ($this->strFormType == 'Edit') ? $this->Dp : '' ?>" class="text required"></td>
+        </tr>
+    </table>
+    <br/>
+    <table id="table_form_dt" width="80%">
+        <tr>
+            <td colspan="5">Transaction Detail :</td>
+        </tr>
+        <tr class="rHeader">
+            <td>Product</td>
+            <td>Size</td>
+            <td>Color</td>
+            <td>Material</td>
+            <td>Price</td>
+            <td>Qty.</td>
+            <td>Total</td>
+            <td>Action</td>
+        </tr>
+        <tr class="rHeader">
+            <td>
+                <label for="ProductID"></label>
+                <select name="ProductID" id="ProductID" class="dropdown" onchange="javascript:loadPrice();">
+                    <option value="">--</option>
+                    <?php
+                    foreach ($this->Products as $arrProduct) {
+                        ?>
+                        <option value="<?php echo $arrProduct["id"];?>"><?php echo $arrProduct["code"].'|'.$arrProduct["name"]?></option>
+                        <?php
+                    }
+                    ?>
+                </select>
+            </td>
+            <td>
+                <label for="Size"></label>
+                <select name="Size" id="Size" class="dropdown">
+                    <option value="">--</option>
+                    <?php
+                    foreach ($this->Sizes as $size) {
+                        ?>
+                        <option value="<?php echo $size["id"];?>"><?php echo $size["name"];?></option>
+                        <?php
+                    }
+                    ?>
+                </select>
+            </td>
+            <td>
+                <label for="Color"></label>
+                <select name="Color" id="Color" class="dropdown">
+                    <option value="">--</option>
+                    <?php
+                    foreach ($this->Colors as $Color) {
+                        ?>
+                        <option value="<?php echo $Color["id"];?>"><?php echo $Color["name"];?></option>
+                        <?php
+                    }
+                    ?>
+                </select>
+            </td>
+            <td>
+                <label for="Material"></label>
+                <select name="Material" id="Material" class="dropdown">
+                    <option value="">--</option>
+                    <?php
+                    foreach ($this->Materials as $Material) {
+                        ?>
+                        <option value="<?php echo $Material["id"];?>"><?php echo $Material["name"];?></option>
+                        <?php
+                    }
+                    ?>
+                </select>
+            </td>
+            <td><label for="Price"></label> <input type="text" name="Price" id="Price" size="10" value="" class="" style="text-align: right;"></td>
+            <td><label for="Qty"></label> <input type="text" name="Qty" id="Qty" size="10" value="" class="" onkeyup="javascript:loadTotal();"></td>
+            <td><label for="dTotal"></label> <input type="text" name="dTotal" readonly id="dTotal" size="10" value="" class="" style="text-align: right;"></td>
+            <td><input type="button" name="btnAddDetail" id="btnAddDetail" value="Add"></td>
+        </tr>
+        <tbody id="tbody">
+        <?php
+        $grandtotal = 0;
+        foreach($this->Items as $idx => $item) {
+        ?>
+        <tr id="row_<?php echo $idx;?>">
+            <td id="product_<?php echo $idx;?>"><?php echo $item['productid'] . '|' . $item['productcode'] . '|' . $item['productname'];?></td>
+            <td><?php echo $item['sizename'];?><input type="hidden" id="size_<?php echo $idx;?>" value="<?php echo $item['sizeid'];?>"></td>
+            <td><?php echo $item['colorname'];?><input type="hidden" id="color_<?php echo $idx;?>" value="<?php echo $item['colorid'];?>"></td>
+            <td><?php echo $item['materialname'];?><input type="hidden" id="material_<?php echo $idx;?>" value="<?php echo $item['materialid'];?>"></td>
+            <td id="price_<?php echo $idx;?>" align="right"><?php echo $item['price'];?></td>
+            <td id="qty_<?php echo $idx;?>"><?php echo $item['amount'];?></td>
+            <td id="total_<?php echo $idx;?>" align="right"><?php echo $item['total'];?></td>
+            <td><a href="#" onclick="deleteRowDetail('<?php echo $idx;?>');">Delete</a></td>
+        </tr>
+        <?php
+            $grandtotal += $item['total'];
+            $idx++;
+        }
+        ?>
+        </tbody>
+        <tr bgcolor="aqua">
+            <td colspan="6" align="right">Grand Total</td>
+            <td align="right"><span id="grandtotal" style="color: red;text-align: right;"><?php echo $grandtotal;?></span></td>
+        </tr>
+    </table>
+
+<hr>
+<div id="form_save_result" class="form_save_success">Save successful</div>
+<input type="hidden" name="type" id="type" value="<?php echo $this->strFormType; ?>">
+<input type="hidden" id="numrows" name="numrows" value="<?php echo $this->NumRows ?>">
+<input type="button" value="Save" id="btn_save" class="button" onclick="javascript:save_form();">
+<input type="button" value="New" id="btn_new" class="button" onclick="window.location='/trnservice/form/type/add'">
+<input type="button" value="Delete" id="btn_delete" class="button">
+<input type="button" value="Close" id="btn_close" onclick="window.location='/trnservice'" class="button">
+</form>
+<iframe id="form_iframe" name="form_iframe" src="" style="width:100%;height:200px;border:0px solid #FFFFFF;"></iframe>
+
+<div id="dialog-modal" title="Attention" style="display:none"></div>
+
+<div id="dialog-confirm" title="Delete record?" style="display:none">
+	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This record will be permanently deleted and cannot be recovered. Are you sure?</p>
+</div>
+<?php
+//print_r($this->Items);
+?>
+<script type="text/javascript">
+    $('#btnAddDetail').click(function() {
+        rowNum = parseInt(document.getElementById('numrows').value);
+        product = $('#ProductID').val() + '|' + $('#ProductID option:selected').text();
+        sizeid = $('#Size').val();
+        sizename = $('#Size option:selected').text();
+        colorid = $('#Color').val();
+        colorname = $('#Color option:selected').text();
+        materialid = $('#Material').val();
+        materialname = $('#Material option:selected').text();
+        price = $('#Price').val();
+        qty = $('#Qty').val();
+        total = $('#dTotal').val();
+        //alert(product);
+        $('#tbody').append(
+            '<tr id="row_' + rowNum + '">' +
+                '<td id="product_' + rowNum + '">' + product + '</td>' +
+                '<td>' + sizename + '<input type="hidden" id="size_' + rowNum + '" value="' + sizeid + '"></td>' +
+                '<td>' + colorname + '<input type="hidden" id="color_' + rowNum + '" value="' + colorid + '"></td>' +
+                '<td>' + materialname + '<input type="hidden" id="material_' + rowNum + '" value="' + materialid + '"></td>' +
+                '<td id="price_' + rowNum + '" align="right">' + price + '</td>' +
+                '<td id="qty_' + rowNum + '">' + qty + '</td>' +
+                '<td id="total_' + rowNum + '" align="right">' + total + '</td>' +
+                '<td><a href="#" onclick="deleteRowDetail(' + rowNum + ');">Delete</a></td>' +
+            '</tr>');
+        rowNum++;
+        $('#numrows').val(rowNum);
+        loadGrandTotal();
+    });
+
+    function deleteRowDetail(rowid) {
+        //alert(rowid);
+        $('#row_' + rowid).remove();
+        document.getElementById('numrows').value = parseInt(document.getElementById('numrows').value) - 1;
+        loadGrandTotal();
+    }
+
+    function save_form(){
+        //array data header
+        if ($('#CustomerName').val() == '' || $('#CustomerName').val() == '') {
+            $('#form').submit();
+            return false;
+        }
+        else {
+            data = Object();
+
+            data['ID'] = $('#ID').val();
+            data['BranchID'] = $('#BranchID').val();
+            data['ServiceType'] = $('#ServiceType').val();
+            data['TrnNo'] = $('#TrnNo').val();
+            data['TrnDate'] = $('#TrnDate').val();
+            data['CustomerId'] = $('#CustomerId').val();
+            data['CustomerName'] = $('#CustomerName').val();
+            data['Phone'] = $('#Phone').val();
+            data['Total'] = $('#Total').val();
+            data['Dp'] = $('#Dp').val();
+
+            //array data detail
+            data.items = new Object();
+            numrows = parseInt($('#numrows').val());
+            //alert(numrows);
+            //return false;
+            count = 0;
+            for(i=0; i<numrows; i++){
+                //alert(i);
+                if($('#row_' + i) != null){
+                    if( $('#row_' + i).html() != '' && $('#row_' + i).html() != null){
+                        data.items[i] ={
+                            //"itemmode" : document.getElementById('itemmode' + i).value,
+                            //"itemid" : document.getElementById('itemid' + i).value,
+                            "product" : $('#product_' + i).html(),
+                            "size" : $('#size_' + i).val(),
+                            "color" : $('#color_' + i).val(),
+                            "material" : $('#material_' + i).val(),
+                            "price" : $('#price_' + i).html(),
+                            "qty" : $('#qty_' + i).html(),
+                            "total" : $('#total_' + i).html()
+                        };
+                    }
+                }
+            }
+            obj = JSON.stringify(data);
+
+            $.ajax({
+                url: '/trnservice/save/type/' + $('#type').val(),
+                type: 'POST',
+                data : {jsonstring : obj},
+                success : function(msg){
+                    //alert(msg);
+                    window.location = "/trnservice";
+                }
+            });
+        }
+    }
+
+    $('#btn_delete').click(function() {
+        if ($('#type').val() == "Add") {
+            return;
+        }
+
+        $( "#dialog-confirm" ).dialog({
+            resizable: false,
+            height:200,
+            modal: true,
+            buttons: {
+                "Delete record": function() {
+                    $( this ).dialog("close");
+                    $.get("/trnservice/save/type/Delete/ID/" + $('#ID').val(), function() {
+                        window.location = '/trnservice';
+                    });
+                },
+                Cancel: function() {
+                    $( this ).dialog("close");
+                }
+            }
+        });
+    });
+
+    var strTrnID = $('#ID').val();
+
+    $("#form").validate();
+</script>

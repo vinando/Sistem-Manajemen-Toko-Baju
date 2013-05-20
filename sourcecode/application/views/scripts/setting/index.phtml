@@ -1,0 +1,50 @@
+<div id="form_save_result" class="form_save_success">Save successful</div>
+<div id="content_header"><h2>Maintenance - Setting</h2><div style="float:right"><h2 id="form_type"><?php echo $this->strFormType;?> Record</h2></div></div>
+<hr></hr>
+<form id="form" method="POST" action="/setting/save" class="form_element" enctype="multipart/form-data" target="form_iframe">
+<table id="table_form">
+    <tr>
+        <td>Frontliners Refresh Rate (in milisecond)</td>
+        <td><input type="text" name="FrontlinersRefreshRate" id="FrontlinersRefreshRate" size="10" value="<?php echo $this->FrontlinersRefreshRate ?>" class="text"></td>
+    </tr>
+    <tr>
+        <td>Frontliners auto logout time (HH:MM:SS)</td>
+        <td><input type="text" name="FrontlinersAutoLogoutTime" id="FrontlinersAutoLogoutTime" size="10" value="<?php echo $this->FrontlinersAutoLogoutTime ?>" class="text"></td>
+    </tr>
+    <tr>
+        <td>Main display & Ticket Box Running Text Refresh Rate (in mili second)</td>
+        <td><input type="text" name="RunningTextRefreshRate" id="RunningTextRefreshRate" size="10" value="<?php echo $this->RunningTextRefreshRate ?>" class="text"></td>
+    </tr>
+    <tr>
+        <td>Main Display Counter Status & Calling Refresh Rate (in mili second)</td>
+        <td><input type="text" name="MainDisplayRefreshRate" id="MainDisplayRefreshRate" size="10" value="<?php echo $this->MainDisplayRefreshRate ?>" class="text"></td>
+    </tr>
+    <tr>
+        <td>Set this Ticket Category as PDC</td>
+        <td>
+            <select name="PDTTicketCategoryID" id="PDTTicketCategoryID" class="dropdown">
+                <option value="">--</option>
+                <?php
+                foreach ($this->Categories as $arrCategoy) {
+                ?>
+                <option value="<?php echo $arrCategoy["TicketCategoryID"];?>" <?php if ($this->PDTTicketCategoryID == $arrCategoy["TicketCategoryID"]) {echo "selected";}?>><?php echo $arrCategoy["TicketCategoryName"]?></option>
+                <?php
+                }
+                ?>
+            </select>
+        </td>
+    </tr>
+    <tr>
+        <td>Main display Page Refresh Rate after Ajax calls</td>
+        <td><input type="text" name="AjaxCallLimitToRefreshPage" id="AjaxCallLimitToRefreshPage" size="10" value="<?php echo $this->AjaxCallLimitToRefreshPage ?>" class="text"></td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>
+            <input type="hidden" name="type" id="type" value="edit">
+            <input type="submit" value="Save" id="btn_save" class="button">
+        </td>
+    </tr>
+</table>
+</form>
+<iframe id="form_iframe" name="form_iframe" src="" style="width:200;height:200;border:0px solid #FFFFFF;"></iframe>

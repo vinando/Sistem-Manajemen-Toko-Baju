@@ -1,0 +1,81 @@
+<?php
+
+class ProductivityController extends Zend_Controller_Action
+{
+	private $model;
+	private $model_report;
+	private $model_branchcounter;
+	
+    public function init()
+    {
+        /* Initialize action controller here */
+        $this->model = new Application_Model_Branch();
+        $this->model_report = new Application_Model_Report();
+        $this->model_branchcounter =  new Application_Model_Branchcounter();
+        
+        $this->view->AccordionID  = "Reporting";
+        $this->view->SelectedMenu = "Productivity";
+    }
+	public function preDispatch() {
+    	if (!Zend_Auth::getInstance()->hasIdentity()) {
+    	    $this->_helper->redirector('login', '');
+        }
+    }
+    public function indexAction()
+    {
+        // action body
+        if($_SESSION['BranchID'] == '') $this->view->branchs = $this->model->getAll();
+        else $this->view->branchs = $this->model->getSingleBranch($_SESSION['BranchID']);
+    }
+	public function viewresultAction()
+    {
+        // action body
+        $data = $this->getDataProductivity();
+        $this->view->data = $data;
+    }
+    public function getDataProductivity(){
+    	$branchids = $this->getRequest()->getParam('branchids');
+        $branchids = explode(',', $branchids);
+        $startdate = $this->getRequest()->getParam('startdate');
+        $enddate = $this->getRequest()->getParam('enddate');
+        $data = array();
+        foreach ($branchids as $idx => $branchid){
+        	$branch = $this->model_report->getSingleBranch($branchid);
+        	$data[$idx]['branch'] = $branch;
+        	//$ticketcategories = $this->model_report->getTicketCategories($branchid);
+        	$ticketcategories = $this->model_branchcounter->getAllTicketCategory($branchid);
+        	
+        	$total_productivity_std = 0;
+        	$total_served = 0;
+        	$total_productivity = 0;
+        	
+        	foreach ($ticketcategories as $idx1 => $ticketkategory){
+        		$data[$idx]['data'][$idx1]['ticketcategory'] = $ticketkategory;
+        		$productivity_std = $this->model_report->getProductivityStd($branchid, $ticketkategory['TicketCategoryID']);
+        		$served = $this->model_report->getServed($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate));
+        		
+        		//print_r($productivity_std);
+        		//echo '<br><br>';
+        		$productivity = ($productivity_std[0]['StandardProductivity'] == 0) ? 0 : $served[0]['served']/$productivity_std[0]['StandardProductivity'] * 100; 
+        		    		
+        		$data[$idx]['data'][$idx1]['productivity_std'] = $productivity_std[0]['StandardProductivity'];
+        		$data[$idx]['data'][$idx1]['served'] = $served[0]['served'];
+        		$data[$idx]['data'][$idx1]['productivity'] = $productivity;
+        		
+        		$total_productivity_std += $productivity_std[0]['StandardProductivity'];
+        		$total_served += $served[0]['served'];
+        		//$total_productivity += $productivity;
+        	}            	
+        	$total_productivity = ($total_productivity_std == 0) ? 0 : $total_served/$total_productivity_std * 100;
+        	$data[$idx]['total_productivity_std'] = $total_productivity_std;
+        	$data[$idx]['total_served'] = $total_served;
+        	$data[$idx]['total_productivity'] = $total_productivity;
+        }
+        return $data;	
+    }
+    public function convertDate($date){
+		$date = explode('-', $date);
+		return $date[2].'-'.$date[1].'-'.$date[0];
+	}
+}
+

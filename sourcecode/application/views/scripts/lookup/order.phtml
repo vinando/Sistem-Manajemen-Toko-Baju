@@ -1,0 +1,38 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#table_list_order').dataTable({
+            "bJQueryUI": true,
+            "bServerSide": true,
+            "sServerMethod": "POST",
+            "sPaginationType": "full_numbers",
+            "sAjaxSource": "/lookup/dataorder"
+        });
+
+        $('#table_list_order tbody tr').live('dblclick', function () {
+            nTds = $('td', this);
+            strOrderID = $(nTds[0]).text();
+            strOrderNo = $(nTds[2]).text();
+
+            $('#OrderId').val(strOrderID);
+            $('#OrderNo').val(strOrderNo);
+            $('#lookup').dialog('close');
+        });
+    });
+</script>
+<h1>Order Lookup</h1>
+
+<table id="table_list_order">
+    <thead>
+    <tr>
+        <td>Order. ID</td>
+        <td>Branch ID</td>
+        <td>Order No.</td>
+        <td>Order Date</td>
+        <td>Status</td>
+        <td>Customer Name</td>
+        <td>Phone</td>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>

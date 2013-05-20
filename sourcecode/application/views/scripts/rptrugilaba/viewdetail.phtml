@@ -1,0 +1,59 @@
+<div id="content_header"><h2>Reporting - Sales Order Detail</h2></div>
+<hr>
+<br/>
+<table>
+    <tr>
+        <td>Order No.</td><td>: <?php echo $this->dataHeader['orderno'];?></td>
+    </tr>
+    <tr>
+        <td>Order Date</td><td>: <?php echo $this->dataHeader['orderdate'];?></td>
+    </tr>
+    <tr>
+        <td>Customer Name</td><td>: <?php echo $this->dataHeader['customername'];?></td>
+    </tr>
+    <tr>
+        <td>Telephone</td><td>: <?php echo $this->dataHeader['phone'];?></td>
+    </tr>
+</table>
+<table id="table_list" width="100%" cellspacing="1" cellpadding="5">
+<thead>
+    <tr bgcolor="#d6d6d6">
+        <td>Product</td>
+        <td>Size</td>
+        <td>Color</td>
+        <td>Material</td>
+        <td>Price</td>
+        <td>Qty</td>
+        <td>Total</td>
+    </tr>
+</thead>
+<tbody>
+<?php
+$grandTotal = 0;
+if(count($this->dataDetail) > 0){
+    $i = 0;
+    foreach($this->dataDetail as $idx => $item ) {
+        $i++;
+        $grandTotal += $item['total'];
+        if($i%2 == 0) $bgcolor = "#e6e6fa";
+        else $bgcolor = "#f1f0f0";
+    ?>
+    <tr bgcolor="<?php echo $bgcolor; ?>">
+        <td><?php echo $item['productname']; ?></td>
+        <td><?php echo $item['sizename']; ?></td>
+        <td><?php echo $item['colorname']; ?></td>
+        <td><?php echo $item['materialname']; ?></td>
+        <td align="right"><?php echo $item['price']; ?></td>
+        <td align="right"><?php echo $item['amount']; ?></td>
+        <td align="right"><?php echo $item['total']; ?></td>
+    </tr>
+    <?php
+    }
+}
+?>
+</tbody>
+    <tr>
+        <td colspan="6" align="right">Total :</td>
+        <td align="right" style="color: red;"><?php echo $grandTotal; ?></td>
+    </tr>
+</table>

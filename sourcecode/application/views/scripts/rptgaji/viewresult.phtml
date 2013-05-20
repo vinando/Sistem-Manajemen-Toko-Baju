@@ -1,0 +1,115 @@
+<div id="content_header"><h2>Reporting - Gaji Pegawai</h2></div>
+<hr>
+<?php
+//print_r($this->data);
+echo '<br/>';
+echo 'Period Report: <b>'.$this->startdate. '</b> to <b>'.$this->enddate.'</b>';
+echo '<br/><br/>';
+//echo count($this->data);
+if(count($this->data) > 0){
+    foreach ($this->data as $idx => $branchData) {
+        if(count($this->data) > 1) echo ($idx+1).'. ';
+        echo 'Cabang : ' . $branchData['branch']['name'].'<br/>';
+        ?>
+    <br/><b>1. Gaji Penjahit:</b>
+    <table id="table_list" cellspacing="1" cellpadding="5">
+        <thead>
+        <tr bgcolor="#FFFFFF">
+            <td colspan="12">&nbsp;</td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr bgcolor="#d6d6d6">
+            <td align="center" width="10">No.</td>
+            <td align="center" width="200">Employee Name</td>
+            <td align="center" width="100">Total Salary</td>
+            <td align="center" width="50">Action</td>
+        </tr>
+            <?php
+            if(count($branchData['penjahits']) > 0){
+                $i=0;
+                foreach ($branchData['penjahits'] as $idx1 => $data){
+                    $i++;
+                    if($i%2 == 0) $bgcolor = "#e6e6fa";
+                    else $bgcolor = "#f1f0f0";
+                    ?>
+                <tr bgcolor="<?php echo $bgcolor; ?>">
+                    <td align="left"><?php echo $i; ?></td>
+                    <td align="left"><?php echo $data['employee']['name']; ?></td>
+                    <td align="right"><?php echo ($data['datagaji'][0]['totalgaji'] == '') ? 0 : $data['datagaji'][0]['totalgaji']; ?></td>
+                    <td align="center"><a href="#" onclick="javascript: return showDetail(<?php echo $branchData['branch']['id']; ?>, '<?php echo $data['employee']['id'];?>');">Detail</a></td>
+                </tr>
+                    <?php
+                }
+            }
+            else{
+                ?>
+            <tr bgcolor="#f1f0f0" style="color : red;">
+                <td align="center" colspan="12"><b>No data to display</b></td>
+            </tr>
+                <?php
+            }
+            ?>
+        </tbody>
+    </table>
+    <br/>
+    <br/><b>2. Gaji Karyawan Office:</b>
+    <table id="table_list" cellspacing="1" cellpadding="5">
+        <thead>
+        <tr bgcolor="#FFFFFF">
+            <td colspan="12">&nbsp;</td>
+        </tr>
+        </thead>
+        <tbody>
+        <tr bgcolor="#d6d6d6">
+            <td align="center" width="10">No.</td>
+            <td align="center" width="200">Employee Name</td>
+            <td align="center" width="200">Tipe</td>
+            <td align="center" width="100">Total Salary</td>
+        </tr>
+            <?php
+            if(count($branchData['karyawans']) > 0){
+                $i=0;
+                foreach ($branchData['karyawans'] as $idx1 => $data){
+                    $i++;
+                    if($i%2 == 0) $bgcolor = "#e6e6fa";
+                    else $bgcolor = "#f1f0f0";
+                    ?>
+                <tr bgcolor="<?php echo $bgcolor; ?>">
+                    <td align="left"><?php echo $i; ?></td>
+                    <td align="left"><?php echo $data['name']; ?></td>
+                    <td align="left"><?php echo $data['type']; ?></td>
+                    <td align="right"><?php echo $data['salary']; ?></td>
+                </tr>
+                    <?php
+                }
+            }
+            else{
+                ?>
+            <tr bgcolor="#f1f0f0" style="color : red;">
+                <td align="center" colspan="12"><b>No data to display</b></td>
+            </tr>
+                <?php
+            }
+            ?>
+        </tbody>
+    </table>
+    <br/><br/>
+    <?php
+    }
+}
+?>
+<div id="detailDialog"></div>
+<script type="text/javascript">
+    function showDetail(branchid, employeeid) {
+        url = '/rptgaji/viewdetail/branchid/' + branchid + '/employeeid/' + employeeid + '/startdate/<?php echo $this->startdate; ?>/enddate/<?php echo $this->enddate; ?>';
+        //window.location = url;
+        $('#detailDialog').load(url).dialog({
+            modal   : true,
+            width   : 800,
+            height  : 600,
+            button  : 'close'
+        });
+        return false;
+    }
+</script>

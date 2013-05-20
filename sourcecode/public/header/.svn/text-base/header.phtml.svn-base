@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <link type="text/css" href="/css/smoothness/jquery-ui-1.8.19.custom.css" rel="Stylesheet" />
+        <link type="text/css" href="/css/jquery.dataTables.css" rel="Stylesheet" />
+        <link type="text/css" href="/css/jquery.dataTables_themeroller.css" rel="Stylesheet" />
+        <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+        <script type="text/javascript" src="/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/js/jquery.dataTables.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                    $('#main_menu').accordion({autoHeight: false});
+                    $('#table_list').dataTable({
+                        "bJQueryUI": true,
+                        "sPaginationType": "full_numbers",
+                        "sAjaxSource": "index3data"
+                    });
+
+                    $( "input:submit, button", ".form" ).button();
+            });
+        </script>
+    </head>
+    <body>
+        <table width="100%" height="100%" id="main_container">
+          <tr>
+            <td colspan="2" id="pane_top">Header</td>
+          </tr>
+          <tr>
+            <td id="pane_left">
+                <div id="main_menu">
+                    <h3><a href="#" class="menu_header">Master</a></h3>
+                    <div>
+                        <ul class="main_menu">
+                            <li class="main_menu_item">User</li>
+                            <li class="main_menu_item">User Roles</li>
+                            <li class="main_menu_item_selected">Branches</li>
+                            <li class="main_menu_item">Branches Media</li>
+                            <li class="main_menu_item">Branches Media</li>
+                        </ul>
+                    </div>
+                    <h3><a href="#" class="menu_header">Reporting</a></h3>
+                    <div>
+                        <ul class="main_menu">
+                            <li class="main_menu_item">Traffic Report</li>
+                            <li class="main_menu_item">User Roles</li>
+                            <li class="main_menu_item">Branches</li>
+                            <li class="main_menu_item">Branches Media</li>
+                            <li class="main_menu_item">Branches Media</li>
+                        </ul>
+                    </div>
+                    <h3><a href="#" class="menu_header">Maintenance</a></h3>
+                    <div>
+                        <ul class="main_menu">
+                            <li class="main_menu_item">Export data</li>
+                        </ul>
+                    </div>
+                    <h3><a href="#" class="menu_header">Account</a></h3>
+                    <div>
+                        <ul class="main_menu">
+                            <li class="main_menu_item">Change Password</li>
+                            <li class="main_menu_item">Logout</li>
+                        </ul>
+                    </div>
+                </div>
+            </td>
+            <td height="100%" id="pane_center">

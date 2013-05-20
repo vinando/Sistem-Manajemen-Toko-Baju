@@ -1,0 +1,77 @@
+<?php
+echo "Starting FTP Sending Process at " . date("Y-m-d H:i:s") . "\n";
+
+// Koneksi Database
+$strHost     = '10.100.10.13';
+$strUserName = 'ACCQueuing';
+$strPassword = '123ACCQueuing';
+$strDBName   = 'acc_queueing';
+
+echo 'Connecting to Database...';
+$conn = mysql_connect($strHost, $strUserName, $strPassword) or die( 'Could not connect to Database!' . chr(13) . mysql_error() );
+
+$db = mysql_select_db($strDBName) or die( 'Database name does not exist' . chr(13) . mysql_error() );
+echo 'Connected!\n';
+
+echo "Checking session...";
+$strSQL = "SELECT * FROM trn_ftp_transfer_session WHERE FTPAction = 'send'";
+$rstSQL = mysql_query($strSQL);
+$arrRecord = mysql_fetch_assoc($rstSQL);
+if ($arrRecord["Status"] ==  "busy") {
+	echo "busy. Exiting...\n";
+	exit();
+} else {
+	echo "idle. Continuing...\n";
+	$strSQL = "REPLACE INTO trn_ftp_transfer_session (FTPAction, Status) VALUES ('send', 'busy')";
+	mysql_query($strSQL);
+}
+
+echo "Getting all queued process...";
+$strSQL = "SELECT * FROM trn_ftp_transfer WHERE FTPAction = 'send' AND Status = 'queued'";
+$result = mysql_query($strSQL);
+
+if (!$result) {
+    $strMessage  = 'Invalid query: ' . mysql_error() . '\n';
+    $strMessage .= 'Whole query: ' . $strSQL . '\n';
+    stopProcess($strMessage);
+} else {
+	echo "done. Found " . count($result) . "records\n";
+}
+
+echo 'Fetching Data...\n';
+while ($row = mysql_fetch_assoc($result)) {
+	$strFilePath = $row['FileLocation'];
+    $strFileName = basename($strFilePath);
+
+    echo "Trying to delete previous file ($strFileName)...";
+    $connFtp = ftp_connect($row['FTPAddress']);
+    ftp_login($connFtp, $row['FTPUserName'], $row['FTPPassword']);
+    @ftp_delete($connFtp, $strFileName);
+    echo "done!\n";
+    
+    echo "Send new file $strFileName to {$row['FTPAddress']} ....";
+	if (copy($strFilePath, "ftp://{$row['FTPUserName']}:{$row['FTPPassword']}@{$row['FTPAddress']}/$strFileName")) {
+		
+		// Update status
+		$strSQL = "UPDATE trn_ftp_transfer SET Status = 'sent' WHERE RequestID = '{$row['RequestID']}'";
+		$result = mysql_query($strSQL);
+	    echo "success!\n";
+	} else {
+	    echo "failed!\n";
+	}
+}
+stopProcess();
+
+function stopProcess($strMessage = "") {
+	echo "\n";
+	if ($strMessage) {
+		echo "Error while processing\nMessage:$strMessage\nProcess Stopped.";
+	} else {
+		echo "Process Done!";
+	}
+	
+	// Clear session
+	$strSQL = "REPLACE INTO trn_ftp_transfer_session (FTPAction, Status) VALUES ('send', 'idle')";
+	mysql_query($strSQL);	
+}
+?>

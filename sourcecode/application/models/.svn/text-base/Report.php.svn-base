@@ -1,0 +1,217 @@
+<?php
+class Application_Model_Report {
+	private $sDb;
+
+	function __construct() {
+		$this->sDb = Zend_Registry::get('DB');
+	}
+	function getSingleBranch($strBranchID) {
+		$strSQL = "SELECT * FROM mst_branch WHERE BranchID = '$strBranchID'";
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_ASSOC);
+		$res = $stmt->fetch();
+		return $res;
+	}
+	function getWaitingTime($branchid, $ticketcategoryid, $startdate, $enddate, $start, $end){
+		$strSQL = "	SELECT * 
+					FROM trn_ticketing 
+					WHERE BranchID = ".$branchid." 
+						AND TicketCategoryID = ".$ticketcategoryid." 
+						AND TIMEDIFF(CalledDate, CreateDate) > '".$start."' 
+						AND TIMEDIFF(CalledDate, CreateDate) < '".$end."' 
+						AND CreateDate >= '".$startdate."' 
+						AND CreateDate < DATE_ADD('".$enddate."', INTERVAL 1 DAY)";		
+		//echo $strSQL.'<br/><br/>';
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_ASSOC);
+		$res = $stmt->fetchAll();
+		return $res;
+	}
+	function getWalkin($branchid, $ticketcategoryid, $startdate, $enddate, $start, $end){
+		$strSQL = "	SELECT * 
+					FROM trn_ticketing 
+					WHERE BranchID = ".$branchid." 
+						AND TicketCategoryID = ".$ticketcategoryid." 
+						AND TIME(CreateDate) > '".$start."' 
+						AND TIME(CreateDate) < '".$end."' 
+						AND CreateDate >= '".$startdate."' 
+						AND CreateDate < DATE_ADD('".$enddate."', INTERVAL 1 DAY)";		
+		//echo $strSQL.'<br/><br/>';
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_ASSOC);
+		$res = $stmt->fetchAll();
+		return $res;
+	}
+	
+	function getWalkinRelation($branchid, $startdate, $enddate){
+		$strSQL = "	SELECT count(*) as count, RelationWithCustomer
+					FROM trn_ticketing
+					WHERE BranchID = ".$branchid."
+						AND CreateDate >= '".$startdate."'
+						AND CreateDate < DATE_ADD('".$enddate."', INTERVAL 1 DAY) 
+						AND RelationWithCustomer <> '' 
+						AND RelationWithCustomer <> 'NULL'
+					GROUP BY RelationWithCustomer";
+		//echo $strSQL.'<br/><br/>';
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_ASSOC);
+		$res = $stmt->fetchAll();
+		return $res;
+	}
+	
+	function getTotalWalkin($branchid, $startdate, $enddate){
+		$strSQL = "	SELECT count(*) as totalcount
+					FROM trn_ticketing
+					WHERE BranchID = ".$branchid."
+						AND CreateDate >= '".$startdate."'
+						AND CreateDate < DATE_ADD('".$enddate."', INTERVAL 1 DAY)
+						AND RelationWithCustomer <> ''
+						AND RelationWithCustomer <> 'NULL'";
+		//echo $strSQL.'<br/><br/>';
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_ASSOC);
+		$res = $stmt->fetch();
+		return $res;
+	}
+	
+	function getTicketCategories($branchid){
+		$strSQL = "SELECT * FROM mst_ticket_category t1, mst_branch_ticket_category t2 WHERE t1.TicketCategoryID = t2.TicketCategoryID AND t2.BranchID = ".$branchid;
+		//echo $strSQL."<br>";
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_ASSOC);
+		$res = $stmt->fetchAll();
+		return $res;
+	}
+	function getTotalLoginTime($branchid, $ticketcategoryid, $startdate, $enddate){
+		$strSQL = "	SELECT SEC_TO_TIME( SUM( TIME_TO_SEC( TIMEDIFF(t1.LogoutTime, t1.LoginTime) ) ) ) as totallogintime
+					FROM trn_counter_session t1, mst_branch_counter t2 
+					WHERE t1.BranchID = t2.BranchID  
+						AND t1.CounterNo = t2.CounterNo  
+						AND t1.BranchID = ".$branchid." 
+						AND t2.TicketCategoryID = ".$ticketcategoryid." 
+						AND t1.LoginTime >= '".$startdate."' 
+						AND t1.LoginTime < DATE_ADD('".$enddate."', INTERVAL 1 DAY)";		
+		//echo $strSQL.'<br/><br/>';
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_ASSOC);
+		$res = $stmt->fetchAll();
+		return $res;
+	}
+	function getServed($branchid, $ticketcategoryid, $startdate, $enddate){
+		$strSQL = "	SELECT count(0) as served
+					FROM trn_ticketing
+					WHERE BranchID = ".$branchid." 
+						AND TicketCategoryID = ".$ticketcategoryid." 
+						AND FinishDate >= '".$startdate."' 
+						AND FinishDate < DATE_ADD('".$enddate."', INTERVAL 1 DAY)";
+		//echo $strSQL.'<br/><br/>';
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_ASSOC);
+		$res = $stmt->fetchAll();
+		return $res;
+	}
+	function getTotalServiceTime($branchid, $ticketcategoryid, $startdate, $enddate){
+		$strSQL = "	SELECT SEC_TO_TIME( SUM( TIME_TO_SEC( TIMEDIFF(FinishDate, CalledDate) ) ) ) as totalservicetime 
+					FROM trn_ticketing 
+					WHERE BranchID = ".$branchid." 
+						AND TicketCategoryID = ".$ticketcategoryid." 
+						AND FinishDate >= '".$startdate."' 
+						AND FinishDate < DATE_ADD('".$enddate."', INTERVAL 1 DAY)";
+		//echo $strSQL.'<br/><br/>';
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_ASSOC);
+		$res = $stmt->fetchAll();
+		return $res;
+	}
+	function getAverageServiceTime($branchid, $ticketcategoryid, $startdate, $enddate){
+		$strSQL = "	SELECT SEC_TO_TIME( SUM( TIME_TO_SEC( TIMEDIFF(FinishDate, CalledDate) ) ) / count(0) ) as averageservicetime 
+					FROM trn_ticketing 
+					WHERE BranchID = ".$branchid." 
+						AND TicketCategoryID = ".$ticketcategoryid." 
+						AND FinishDate >= '".$startdate."' 
+						AND FinishDate < DATE_ADD('".$enddate."', INTERVAL 1 DAY)";
+		//echo $strSQL.'<br/><br/>';
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_ASSOC);
+		$res = $stmt->fetchAll();
+		return $res;
+	}
+	function getIdleTime($branchid, $ticketcategoryid, $startdate, $enddate){
+		$strSQL = "	SELECT SEC_TO_TIME(totallogintime - totalservicetime) idletime  
+					FROM (	SELECT SUM( TIME_TO_SEC( TIMEDIFF(t1.LogoutTime, t1.LoginTime) ) ) as totallogintime 
+						FROM trn_counter_session t1, mst_branch_counter t2
+						WHERE t1.BranchID = t2.BranchID 
+							AND t1.CounterNo = t2.CounterNo 
+							AND t1.BranchID = ".$branchid." 
+							AND t2.TicketCategoryID = ".$ticketcategoryid." 
+							AND t1.LoginTime >= '".$startdate."' 
+							AND t1.LogoutTime < DATE_ADD('".$enddate."', INTERVAL 1 DAY)) tbl1, 
+					     (	SELECT SUM( TIME_TO_SEC( TIMEDIFF(FinishDate, CalledDate) ) ) as totalservicetime 
+						FROM trn_ticketing 
+						WHERE BranchID = ".$branchid." 
+							AND TicketCategoryID = ".$ticketcategoryid." 
+							AND FinishDate >= '".$startdate."' 
+							AND FinishDate < DATE_ADD('".$enddate."', INTERVAL 1 DAY)) tbl2";
+		//echo $strSQL.'<br/><br/>';
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_ASSOC);
+		$res = $stmt->fetchAll();
+		return $res;
+	}
+	function getEffective($branchid, $ticketcategoryid, $startdate, $enddate){
+		$strSQL = "	SELECT (totalservicetime/totallogintime) * 100 effective  
+					FROM (	SELECT SUM( TIME_TO_SEC( TIMEDIFF(t1.LogoutTime, t1.LoginTime) ) ) as totallogintime 
+							FROM trn_counter_session t1, mst_branch_counter t2
+							WHERE t1.BranchID = t2.BranchID 
+								AND t1.CounterNo = t2.CounterNo 
+								AND t1.BranchID = ".$branchid." 
+								AND t2.TicketCategoryID = ".$ticketcategoryid." 
+								AND t1.LoginTime >= '".$startdate."' 
+								AND t1.LogoutTime < DATE_ADD('".$enddate."', INTERVAL 1 DAY)) tbl1, 
+					     (	SELECT SUM( TIME_TO_SEC( TIMEDIFF(FinishDate, CalledDate) ) ) as totalservicetime 
+							FROM trn_ticketing 
+							WHERE BranchID = ".$branchid." 
+								AND TicketCategoryID = ".$ticketcategoryid." 
+								AND FinishDate >= '".$startdate."' 
+								AND FinishDate < DATE_ADD('".$enddate."', INTERVAL 1 DAY)) tbl2";		
+		//echo $strSQL.'<br/><br/>';
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_ASSOC);
+		$res = $stmt->fetchAll();
+		return $res;
+	}
+	function getProductivityStd($branchid, $ticketcategoryid){
+		$strSQL = "	SELECT StandardProductivity 
+					FROM mst_standard_productivity 
+					WHERE BranchID = ".$branchid." 
+						AND TicketCategoryID = ".$ticketcategoryid;
+		//echo $strSQL.'<br><br>';
+		$stmt = $this->sDb->query($strSQL);
+		$stmt->setFetchMode(Zend_Db::FETCH_ASSOC);
+		$res = $stmt->fetchAll();
+		return $res;
+	}
+	public function time_to_sec($time){
+		$sec = 0;
+		$arr = explode(':', $time);
+		$sec = $arr[0] * 3600 + $arr[1] * 60 + $arr[2];
+		return $sec;
+	}
+	public function sec_to_time($seconds){
+		// extract hours
+	    $hours = floor($seconds / (60 * 60));
+	 
+	    // extract minutes
+	    $divisor_for_minutes = $seconds % (60 * 60);
+	    $minutes = floor($divisor_for_minutes / 60);
+	 
+	    // extract the remaining seconds
+	    $divisor_for_seconds = $divisor_for_minutes % 60;
+	    $seconds = ceil($divisor_for_seconds);
+	    if($hours < 10) $hours = '0'.$hours;
+	 	if($minutes < 10) $minutes = '0'.$minutes;
+	 	if($seconds < 10) $seconds = '0'.$seconds;
+	    return $hours.':'.$minutes.':'.$seconds;
+	}
+}
+?>

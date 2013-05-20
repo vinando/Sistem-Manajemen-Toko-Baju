@@ -1,0 +1,39 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#table_list_service').dataTable({
+            "bJQueryUI": true,
+            "bServerSide": true,
+            "sServerMethod": "POST",
+            "sPaginationType": "full_numbers",
+            "sAjaxSource": "/lookup/dataservice"
+        });
+
+        $('#table_list_service tbody tr').live('dblclick', function () {
+            nTds = $('td', this);
+            strServiceID = $(nTds[0]).text();
+            strServiceNo = $(nTds[3]).text();
+
+            $('#ServiceId').val(strServiceID);
+            $('#ServiceNo').val(strServiceNo);
+            $('#lookup').dialog('close');
+        });
+    });
+</script>
+<h1>Service Lookup</h1>
+
+<table id="table_list_service">
+    <thead>
+    <tr>
+        <td>Trn. ID</td>
+        <td>Branch ID</td>
+        <td>Service Type</td>
+        <td>Trn. No.</td>
+        <td>Trn. Date</td>
+        <td>Status</td>
+        <td>Customer Name</td>
+        <td>Phone</td>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>

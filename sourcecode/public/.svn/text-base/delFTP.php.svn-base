@@ -1,0 +1,68 @@
+<?php
+echo "Starting FTP Delete Process at " . date("Y-m-d H:i:s") . "\n";
+
+// Koneksi Database
+$strHost     = '10.100.10.13';
+$strUserName = 'ACCQueuing';
+$strPassword = '123ACCQueuing';
+$strDBName   = 'acc_queueing';
+
+echo 'Connecting to Database...\n';
+$conn = mysql_connect($strHost, $strUserName, $strPassword) or die( 'Could not connect to Database!' . chr(13) . mysql_error() );
+
+$db = mysql_select_db($strDBName) or die( 'Database name does not exist' . chr(13) . mysql_error() );
+echo 'Connected!\n';
+
+echo "Checking session...";
+$strSQL = "SELECT * FROM trn_ftp_transfer_session WHERE FTPAction = 'delete'";
+$arrRecord = mysql_fetch_assoc($strSQL);
+if ($arrRecord["Status"] ==  "busy") {
+	echo "busy. Exiting...\n";
+	exit();
+} else {
+	echo "idle. Continuing...\n";
+	$strSQL = "REPLACE INTO trn_ftp_transfer_session (FTPAction, Status) VALUES ('delete', 'busy')";
+	mysql_query($strSQL);
+}
+
+$strSQL = "SELECT * FROM trn_ftp_transfer WHERE FTPAction = 'delete' AND Status = 'queued'";
+$result = mysql_query($strSQL);
+
+if (!$result) {
+    $strMessage  = 'Invalid query: ' . mysql_error() . '\n';
+    $strMessage .= 'Whole query: ' . $strSQL . '\n';
+    stopProcess($strMessage);
+}
+
+echo 'Fetching Data...\n';
+while ($row = mysql_fetch_assoc($result)) {
+	$strFilePath = $row['FileLocation'];
+    $strFileName = basename($strFilePath);
+
+    echo "Trying to delete file ($strFileName)...";
+    $connFtp = ftp_connect($row['FTPAddress']);
+    ftp_login($connFtp, $row['FTPUserName'], $row['FTPPassword']);
+    if (ftp_delete($connFtp, $strFileName)) {
+    	echo "failed!\n";
+    } else{
+    	// Update status
+    	$strSQL = "UPDATE trn_ftp_transfer SET Status = 'sent' WHERE RequestID = '{$row['RequestID']}'";
+    	$result = mysql_query($strSQL);    	
+    	echo "success!\n";
+    }
+}
+stopProcess();
+
+function stopProcess($strMessage = "") {
+	echo "\n";
+	if ($strMessage) {
+		echo "Error while processing\nMessage:$strMessage\nProcess Stopped.";
+	} else {
+		echo "Process Done!";
+	}
+	
+	// Clear session
+	$strSQL = "REPLACE INTO trn_ftp_transfer_session (FTPAction, Status) VALUES ('delete', 'idle')";
+	mysql_query($strSQL);	
+}
+?>

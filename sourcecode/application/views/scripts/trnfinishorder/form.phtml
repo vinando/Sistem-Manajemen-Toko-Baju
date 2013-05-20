@@ -1,0 +1,112 @@
+<script type="text/javascript">
+    function showLookup(view) {
+        //alert('asd');
+        url = '/lookup/' + view;
+        $('#lookup').load(url).dialog({
+            modal   : true,
+            width   : 1024,
+            height  : 600,
+            button  : 'close',
+            closeText: 'Close'
+        });
+        return false;
+    }
+</script>
+<div id="content_header"><h2>Transaction - Finish Order</h2><div style="float:right"><h2 id="form_type"><?php echo $this->strFormType;?> Record</h2></div></div>
+<hr>
+
+<form id="form" method="POST" action="/trnfinishorder/save" class="form_element" enctype="multipart/form-data" target="form_iframe">
+
+    <table id="table_form">
+        <tr>
+            <td>Trn. ID</td>
+            <td><input type="text" name="ID" id="ID" size="20" readonly value="<?php echo $this->strID;?>" class="readonlytext"></td>
+        </tr>
+        <tr>
+            <td>Branch ID</td>
+            <td><input type="text" name="BranchID" id="BranchID" size="20" readonly value="<?php echo $_SESSION['BranchID'];?>" class="readonlytext"></td>
+        </tr>
+        <tr>
+            <td>Finish Date</td>
+            <td><label for="FinishDate"></label> <input type="text" name="FinishDate" id="FinishDate" size="20" readonly size="10" value="<?php echo ($this->strFormType == 'Edit') ? $this->FinishDate : 'Auto Generate' ?>" class="readonlytext"></td>
+        </tr>
+        <tr>
+            <td>Finish No. </td>
+            <td><label for="FinishNo"></label> <input type="text" name="FinishNo" id="FinishNo" size="20" readonly value="<?php echo ($this->strFormType == 'Edit') ? $this->FinishNo : 'Auto Generate' ?>" class="readonlytext"></td>
+        </tr>
+        <tr>
+            <td>Order ID</td>
+            <td>
+                <label for="OrderId"></label><input type="text" name="OrderId" id="OrderId" size="20" readonly size="10" value="<?php echo ($this->strFormType == 'Edit') ? $this->OrderId : '' ?>" class="text required">
+                <input type="button" name="orderLookup" id="orderLookup" value="Order Lookup" onclick="javascript:return showLookup('order');">
+            </td>
+        </tr>
+        <tr>
+            <td>Order No</td>
+            <td><label for="OrderNo"></label><input type="text" name="OrderNo" id="OrderNo" size="20" readonly value="<?php echo ($this->strFormType == 'Edit') ? $this->OrderNo : '' ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Employee ID</td>
+            <td>
+                <label for="EmployeeId"></label><input type="text" name="EmployeeId" readonly id="EmployeeId" size="20" value="<?php echo ($this->strFormType == 'Edit') ? $this->EmployeeId : '' ?>" class="text required">
+                <input type="button" name="employeeLookup" id="employeeLookup" value="Employee Lookup" onclick="javascript:return showLookup('employee');">
+            </td>
+        </tr>
+        <tr>
+            <td>Employee Name</td>
+            <td>
+                <label for="EmployeeName"></label><input type="text" name="EmployeeName" readonly id="EmployeeName" size="20" value="<?php echo ($this->strFormType == 'Edit') ? $this->EmployeeName : '' ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Price</td>
+            <td>
+                <label for="Price"></label><input type="text" name="Price" id="Price" size="20" value="<?php echo ($this->strFormType == 'Edit') ? $this->Price : '' ?>" class="text required"></td>
+        </tr>
+    </table>
+    <br/>
+<hr>
+<div id="form_save_result" class="form_save_success">Save successful</div>
+<input type="hidden" name="type" id="type" value="<?php echo $this->strFormType; ?>">
+<input type="submit" value="Save" id="btn_save" class="button">
+<input type="button" value="New" id="btn_new" class="button" onclick="window.location='/trnfinishorder/form/type/add'">
+<input type="button" value="Delete" id="btn_delete" class="button">
+<input type="button" value="Close" id="btn_close" onclick="window.location='/trnfinishorder'" class="button">
+</form>
+<iframe id="form_iframe" name="form_iframe" src="" style="width:100%;height:100px;border:0px solid #FFFFFF;"></iframe>
+
+<div id="dialog-modal" title="Attention" style="display:none"></div>
+
+<div id="dialog-confirm" title="Delete record?" style="display:none">
+	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This record will be permanently deleted and cannot be recovered. Are you sure?</p>
+</div>
+
+<div id="lookup" title="Lookup"></div>
+
+<script type="text/javascript">
+    $('#btn_delete').click(function() {
+        if ($('#type').val() == "Add") {
+            return;
+        }
+
+        $( "#dialog-confirm" ).dialog({
+            resizable: false,
+            height:200,
+            modal: true,
+            buttons: {
+                "Delete record": function() {
+                    $( this ).dialog("close");
+                    $.get("/trnfinishorder/save/type/Delete/ID/" + $('#ID').val(), function() {
+                        window.location = '/trnfinishorder';
+                    });
+                },
+                Cancel: function() {
+                    $( this ).dialog("close");
+                }
+            }
+        });
+    });
+
+    var strTrnID = $('#ID').val();
+
+    $("#form").validate();
+</script>

@@ -1,0 +1,82 @@
+<?php
+
+class Application_Model_Usersmapping
+{
+	protected $_dbTable;
+	
+	public function setDbTable($dbTable)
+    {
+        if (is_string($dbTable)) {
+            $dbTable = new $dbTable();
+        }
+        if (!$dbTable instanceof Zend_Db_Table_Abstract) {
+            throw new Exception('Invalid table data gateway provided');
+        }
+        $this->_dbTable = $dbTable;
+        return $this;
+    }
+ 
+    public function getDbTable()
+    {
+        if (null === $this->_dbTable) {
+            $this->setDbTable('Application_Model_DbTable_Users');
+        }
+        return $this->_dbTable;
+    }
+    public function fetchAll()
+    {
+    	$resultSet = $this->getDbTable()->fetchAll();
+    	$entries = array();
+    	foreach ($resultSet as $row) {
+            $entry = new Application_Model_Users();
+            $entry->setUserid($row->UserID);
+            $entry->setPassword($row->Password);
+          	$entry->setFullname($row->Fullname);
+          	$entry->setEmail($row->Email);
+          	$entry->setBranchid($row->BranchID);
+          	$entry->setCreateby($row->CreateBy);
+          	$entry->setCreatedate($row->CreateDate);
+          	$entry->setUpdateby($row->UpdateBy);
+          	$entry->setUpdatedate($row->UpdateDate);
+            $entries[] = $entry;
+        }
+        return $entries;
+    }
+	public function getUserById($userid, Application_Model_Users $user)
+	{
+		$resultSet = $this->getDbTable()->fetchRow("UserID = '".$userid."'");
+		$user->setUserid($resultSet->UserID);
+        $user->setPassword($resultSet->Password);
+      	$user->setFullname($resultSet->Fullname);
+      	$user->setEmail($resultSet->Email);
+      	$user->setBranchid($resultSet->BranchID);
+      	$user->setCreateby($resultSet->CreateBy);
+      	$user->setCreatedate($resultSet->CreateDate);
+      	$user->setUpdateby($resultSet->UpdateBy);
+      	$user->setUpdatedate($resultSet->UpdateDate);
+	} 
+	public function save(Application_Model_Users $user, $mode)
+	{
+		$data = array(
+			'UserID' => $user->getUserid(),
+			'Password' => $user->getPassword(),
+			'Fullname' => $user->getFullname(),
+			'Email' => $user->getEmail(),
+			'BranchID' => $user->getBranchid(),
+			'CreateBy' => '',
+			'CreateDate' => '',
+			'UpdateBy' => '',
+			'UpdateDate' => ''
+		);
+		if($mode == 'add') {
+			$this->getDbTable()->insert($data);
+		}
+		else {
+			$this->getDbTable()->update( $data, array('UserID = ?' => $user->getUserid() ));
+		}
+	}
+	public function delete($userid){
+		$this->getDbTable()->delete(array('UserID = ?' => $userid ));
+	}
+}
+

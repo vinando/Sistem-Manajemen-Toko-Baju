@@ -1,0 +1,99 @@
+<?php
+
+class BranchcounterController extends Zend_Controller_Action {
+    private $model;
+
+    public function init() {
+        $this->model = new Application_Model_Branchcounter();
+        $this->view->AccordionID  = "Master";
+        $this->view->SelectedMenu = "BranchCounter";
+    }
+
+    public function preDispatch() {
+    	if (!Zend_Auth::getInstance()->hasIdentity()) {
+    	    $this->_helper->redirector('login', '');
+        }
+    }
+
+    public function indexAction(){
+    }
+
+    public function dataAction() {
+        echo json_encode($this->model->getDataTable());
+    	exit;
+    }
+
+    public function formAction(){
+        switch ($this->getRequest()->getParam("type")) {
+            case "add";
+                $this->view->assign("strFormType", "Add");
+                break;
+
+            case "edit":
+                $this->view->assign("strFormType", "Edit");
+                $this->view->assign("BranchID", $this->getRequest()->getParam("branch_id"));
+                $this->view->assign("CounterNo", $this->getRequest()->getParam("counter_no"));
+
+                $arrData = $this->model->getSingle($this->getRequest()->getParam("branch_id"), $this->getRequest()->getParam("counter_no"));
+
+                // Set record data to form
+                $this->view->assign("TicketCategoryID", $arrData['TicketCategoryID']);
+                break;
+        }
+
+        $model = new Application_Model_Branch();
+        $this->view->assign("Branches", $model->getAll());
+
+        $model = new Application_Model_Ticketcategory();
+        $this->view->assign("Categories", $model->getAll());
+    }
+
+    public function saveAction() {
+        switch ($this->getRequest()->getParam("type")) {
+            case "Add":
+                // Check empty fields
+                if (!$this->getRequest()->getParam("BranchID") or !$this->getRequest()->getParam("CounterNo") or !$this->getRequest()->getParam("TicketCategoryID")) {
+                    echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                    exit;
+                }
+
+                // Check duplicate counter no
+                $result = $this->model->getSingle($this->getRequest()->getParam("BranchID"), $this->getRequest()->getParam("CounterNo"));
+                if ($result["CounterNo"] == $this->getRequest()->getParam("CounterNo")) {
+                    echo "<script>window.parent.saveFailed('Counter No already exist!')</script>";
+                    break;
+                }
+
+                $this->model->insert(
+                        addslashes($this->getRequest()->getParam("BranchID")),
+                        addslashes($this->getRequest()->getParam("CounterNo")),
+                        addslashes($this->getRequest()->getParam("TicketCategoryID"))
+                );
+
+                echo "<script>window.parent.saveSuccess();window.parent.disableField('BranchID');window.parent.disableField('CounterNo')</script>";
+                break;
+
+            case "Edit":
+                // Check empty fields
+                if (!$this->getRequest()->getParam("BranchID") or !$this->getRequest()->getParam("CounterNo") or !$this->getRequest()->getParam("TicketCategoryID")) {
+                    echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                    exit;
+                }
+
+                $this->model->update(
+                        addslashes($this->getRequest()->getParam("BranchID")),
+                        addslashes($this->getRequest()->getParam("CounterNo")),
+                        addslashes($this->getRequest()->getParam("TicketCategoryID"))
+                );
+                echo "<script>window.parent.editSuccess()</script>";
+                break;
+
+            case "Delete":
+                $this->model->delete(addslashes($this->getRequest()->getParam("branch_id")), addslashes($this->getRequest()->getParam("counter_no")));
+                break;
+        }
+        exit;
+
+    }
+}
+

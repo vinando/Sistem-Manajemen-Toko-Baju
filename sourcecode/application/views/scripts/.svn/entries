@@ -1,0 +1,109 @@
+10
+
+dir
+147
+http://116.254.100.218:9000/svn/ACCQueueing/trunk/application/views/scripts
+http://116.254.100.218:9000/svn/ACCQueueing
+
+
+
+2012-12-13T03:06:01.886125Z
+146
+gofo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+34b434fc-f58c-ac4b-8a60-990ac04d615a
+
+ticketcategory
+dir
+
+waitingtime
+dir
+
+branchfrontliners
+dir
+
+walkinrelation
+dir
+
+trafficmonitoring
+dir
+
+mediaupload
+dir
+
+walkin
+dir
+
+standardproductivity
+dir
+
+home
+dir
+
+error
+dir
+
+ticketbox
+dir
+
+branch
+dir
+
+branchmedia
+dir
+
+branchcounter
+dir
+
+servicetype
+dir
+
+efficiency
+dir
+
+frontliners
+dir
+
+productivity
+dir
+
+index
+dir
+
+changepassword
+dir
+
+login
+dir
+
+maindisplay
+dir
+
+exportdata
+dir
+
+news
+dir
+
+setting
+dir
+
+relation
+dir
+
+user
+dir
+

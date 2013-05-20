@@ -1,0 +1,97 @@
+<div id="content_header"><h2>Master - Stock</h2><div style="float:right"><h2 id="form_type"><?php echo $this->strFormType;?> Record</h2></div></div>
+<hr>
+
+<form id="form" method="POST" action="/stock/save" class="form_element" enctype="multipart/form-data" target="form_iframe">
+
+    <table id="table_form">
+        <tr>
+            <td>Stock ID</td>
+            <td><label for="ID"></label> <input type="text" name="ID" id="ID" size="20" readonly value="<?php echo $this->strID;?>" class="<?php if ($this->strFormType == "Edit") {echo "readonly ";}?>text"></td>
+        </tr>
+        <tr>
+            <td>Branch ID</td>
+            <td><label for="BranchID"></label>
+                <select name="BranchID" id="BranchID" class="dropdown required">
+                    <option value="">--</option>
+                    <?php
+                    foreach ($this->Branches as $arrBranch) {
+                        ?>
+                        <option value="<?php echo $arrBranch["id"];?>" <?php if ($this->BranchID == $arrBranch["id"]) {echo "selected";}?>><?php echo $arrBranch["code"].' | '.$arrBranch["name"]?></option>
+                        <?php
+                    }
+                    ?>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Product ID</td>
+            <td><label for="ProductId"></label>
+                <select name="ProductId" id="ProductId" class="dropdown required">
+                    <option value="">--</option>
+                    <?php
+                    foreach ($this->Products as $arrProduct) {
+                        ?>
+                        <option value="<?php echo $arrProduct["id"];?>" <?php if ($this->ProductId == $arrProduct["id"]) {echo "selected";}?>><?php echo $arrProduct["name"]; ?></option>
+                        <?php
+                    }
+                    ?>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>No. Seri </td>
+            <td><label for="NoSeri"></label> <input type="text" name="NoSeri" id="NoSeri" size="20" value="<?php echo $this->NoSeri ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Stock * </td>
+            <td><label for="Stock"></label> <input type="text" name="Stock" id="Stock" size="20" value="<?php echo $this->Stock ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Price * </td>
+            <td><label for="Price"></label> <input type="text" name="Price" id="Price" size="20" value="<?php echo $this->Price ?>" class="text required"></td>
+        </tr>
+    </table>
+
+<hr>
+<div id="form_save_result" class="form_save_success">Save successful</div>
+<input type="hidden" name="type" id="type" value="<?php echo $this->strFormType; ?>">
+<input type="submit" value="Save" id="btn_save" class="button">
+<input type="button" value="New" id="btn_new" class="button" onclick="window.location='/stock/form/type/add'">
+<input type="button" value="Delete" id="btn_delete" class="button">
+<input type="button" value="Close" id="btn_close" onclick="window.location='/stock'" class="button">
+</form>
+<iframe id="form_iframe" name="form_iframe" src="" style="width:100%;height:100px;border:0px solid #FFFFFF;"></iframe>
+
+<div id="dialog-modal" title="Attention" style="display:none"></div>
+
+<div id="dialog-confirm" title="Delete record?" style="display:none">
+	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This record will be permanently deleted and cannot be recovered. Are you sure?</p>
+</div>
+<script type="text/javascript">
+        $('#btn_delete').click(function() {
+        if ($('#type').val() == "Add") {
+            return;
+        }
+
+    	$( "#dialog-confirm" ).dialog({
+    		resizable: false,
+    		height:200,
+    		modal: true,
+    		buttons: {
+    			"Delete record": function() {
+    				$( this ).dialog("close");
+    				$.get("/stock/save/type/Delete/ID/" + $('#ID').val(), function() {
+    				    window.location = '/stock';
+    				});
+    			},
+    			Cancel: function() {
+    				$( this ).dialog("close");
+    			}
+    		}
+    	});
+    });
+
+    var strProductID = $('#ID').val();
+
+    $("#form").validate();
+</script>

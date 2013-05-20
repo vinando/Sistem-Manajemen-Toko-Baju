@@ -1,0 +1,73 @@
+<div id="content_header"><h2>Master - News</h2><div style="float:right"><h2 id="form_type"><?php echo $this->strFormType;?> Record</h2></div></div>
+<hr></hr>
+<form id="form" method="POST" action="/news/save" class="form_element" enctype="multipart/form-data" target="form_iframe">
+<table id="table_form">
+    <tr>
+        <td>News ID</td>
+        <td><input type="text" name="ID" id="ID" size="20" readonly value="<?php echo $this->strID;?>" class="<?php if ($this->strFormType == "Edit") {echo "readonly ";}?>text"></td>
+    </tr>
+    <tr>
+    	<td>Branch ID</td>
+        <td>
+        	<select name="BranchID" id="BranchID" class="dropdown">            	
+                        <?php
+                        if (!$_SESSION["BranchID"]) {
+                        	echo '<option value="">--</option>';
+                        }
+                        foreach ($this->Branches as $arrBranch) {
+                        ?>
+                <option value="<?php echo $arrBranch["BranchID"];?>" <?php if ($this->BranchID == $arrBranch["BranchID"]) {echo "selected";}?>><?php echo $arrBranch["BranchName"]?></option>
+                        <?php
+                        }
+                        ?>
+            </select>
+        <td>
+    </tr>    
+    <tr>
+        <td>News Title *</td>
+        <td><input type="text" name="NewsTitle" id="NewsTitle" size="50" maxlength="50" value="<?php echo $this->NewsTitle ?>" class="required text"></td>
+    </tr>
+    <tr>
+        <td>NewsDesc</td>
+        <td><textarea name="NewsDesc" id="NewsDesc" cols="50" rows="5"><?php echo stripslashes($this->NewsDesc) ?></textarea></td>
+    </tr>
+</table>
+<hr>
+<div id="form_save_result" class="form_save_success">Save successful</div>
+<input type="hidden" name="type" id="type" value="<?php echo $this->strFormType; ?>">
+<input type="submit" value="Save" id="btn_save" class="button">
+<input type="button" value="New" id="btn_new" class="button" onclick="window.location='/news/form/type/add'">
+<input type="button" value="Delete" id="btn_delete" class="button">
+<input type="button" value="Close" id="btn_close" onclick="window.location='/news'" class="button">
+</form>
+<iframe id="form_iframe" name="form_iframe" src="" style="width:0;height:0;border:0px solid #FFFFFF;"></iframe>
+<div id="dialog-confirm" title="Delete record?" style="display:none">
+	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This record will be permanently deleted and cannot be recovered. Are you sure?</p>
+</div>
+<script>
+    $('#btn_delete').click(function() {
+        if ($('#type').val() == "Add") {
+            return;
+        }
+
+    	$( "#dialog-confirm" ).dialog({
+    		resizable: false,
+    		height:200,
+    		modal: true,
+    		buttons: {
+    			"Delete record": function() {
+    				$( this ).dialog("close");
+    				$.get("/news/save/type/Delete/ID/" + $('#ID').val(), function() {
+    				    window.location = '/news';
+    				});
+    			},
+    			Cancel: function() {
+    				$( this ).dialog("close");
+    			}
+    		}
+    	});
+    });
+
+    CKEDITOR.replace('NewsDesc');
+    $("#form").validate();
+</script>

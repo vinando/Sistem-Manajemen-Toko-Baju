@@ -1,0 +1,101 @@
+<?php
+
+class StandardproductivityController extends Zend_Controller_Action
+{
+	private $model;
+    public function init()
+    {
+        /* Initialize action controller here */
+        $this->model = new Application_Model_Standardproductivity();
+        
+        $this->view->AccordionID  = "Master";
+        $this->view->SelectedMenu = "StandardProductivity";
+    }
+	public function preDispatch() {
+    	if (!Zend_Auth::getInstance()->hasIdentity()) {
+    	    $this->_helper->redirector('login', '');
+        }
+    }
+    public function indexAction()
+    {
+        // action body
+    }
+	public function dataAction() {
+        echo json_encode($this->model->getDataTable());
+    	exit;
+    }
+    public function formAction(){
+        switch ($this->getRequest()->getParam("type")) {
+            case "add";
+                $this->view->assign("strFormType", "Add");
+                break;
+
+            case "edit":
+                $this->view->assign("strFormType", "Edit");
+                $this->view->assign("BranchID", $this->getRequest()->getParam("BranchID"));
+                $this->view->assign("TicketCategoryID", $this->getRequest()->getParam("TicketCategoryID"));                
+
+                $arrData = $this->model->getSingle($this->getRequest()->getParam("BranchID"), $this->getRequest()->getParam("TicketCategoryID"));
+
+                // Set record data to form
+                //$this->view->assign("MediaID", $arrData['MediaID']);
+                
+                $this->view->assign("StandardProductivity", $arrData['StandardProductivity']);
+                break;
+        }
+
+        $model = new Application_Model_Branch();
+        $this->view->assign("Branches", $model->getAll());
+
+        $model = new Application_Model_Ticketcategory();
+        $this->view->assign("TicketCategoryIDs", $model->getAll());
+    }
+    public function saveAction() {
+        switch ($this->getRequest()->getParam("type")) {
+            case "Add":
+                // Check empty fields
+                if (!$this->getRequest()->getParam("BranchID") or !$this->getRequest()->getParam("TicketCategoryID") or !$this->getRequest()->getParam("StandardProductivity")) {
+                    echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                    exit;
+                }
+
+                // Check duplicate counter no
+                $result = $this->model->getSingle($this->getRequest()->getParam("BranchID"), $this->getRequest()->getParam("TicketCategoryID"));
+                if ($result["TicketCategoryID"] == $this->getRequest()->getParam("TicketCategoryID")) {
+                    echo "<script>window.parent.saveFailed('Records with that BranchID and TicketCategoryID already exist!')</script>";
+                    break;
+                }
+
+                $this->model->insert(
+                        addslashes($this->getRequest()->getParam("BranchID")),                        
+                        addslashes($this->getRequest()->getParam("TicketCategoryID")),
+                        addslashes($this->getRequest()->getParam("StandardProductivity"))
+                );
+
+                echo "<script>window.parent.saveSuccess();window.parent.disableField('BranchID');window.parent.disableField('TicketCategoryID');window.parent.disableField('StandardProductivity')</script>";
+                break;
+
+            case "Edit":
+                // Check empty fields
+                if (!$this->getRequest()->getParam("BranchID") or !$this->getRequest()->getParam("TicketCategoryID") or !$this->getRequest()->getParam("StandardProductivity")) {
+                    echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                    exit;
+                }
+
+                $this->model->update(
+                        addslashes($this->getRequest()->getParam("BranchID")),
+                        addslashes($this->getRequest()->getParam("TicketCategoryID")),                        
+                        addslashes($this->getRequest()->getParam("StandardProductivity"))
+                );
+                echo "<script>window.parent.editSuccess()</script>";
+                break;
+
+            case "Delete":
+                $this->model->delete(addslashes($this->getRequest()->getParam("branch_id")), addslashes($this->getRequest()->getParam("TicketCategoryID")));
+                break;
+        }
+        exit;
+
+    }
+}
+

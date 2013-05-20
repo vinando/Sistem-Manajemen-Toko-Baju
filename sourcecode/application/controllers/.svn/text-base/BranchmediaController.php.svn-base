@@ -1,0 +1,161 @@
+<?php
+
+class BranchmediaController extends Zend_Controller_Action {
+    private $model;
+
+    public function init() {
+        $this->model = new Application_Model_Branchmedia();
+        $this->view->AccordionID  = "Master";
+        $this->view->SelectedMenu = "BranchMedia";
+    }
+
+    public function preDispatch() {
+    	if (!Zend_Auth::getInstance()->hasIdentity()) {
+    	    $this->_helper->redirector('login', '');
+        }
+    }
+
+    public function indexAction(){
+    }
+
+    public function dataAction() {
+        echo json_encode($this->model->getDataTable());
+    	exit;
+    }
+
+    public function formAction(){
+        switch ($this->getRequest()->getParam("type")) {
+            case "add";
+                $this->view->assign("strFormType", "Add");
+                break;
+
+            case "edit":
+                $this->view->assign("strFormType", "Edit");
+                $this->view->assign("BranchID", $this->getRequest()->getParam("branch_id"));
+                $this->view->assign("OldMediaID", $this->getRequest()->getParam("media_id"));
+
+                $arrData = $this->model->getSingle($this->getRequest()->getParam("branch_id"), $this->getRequest()->getParam("media_id"));
+
+                // Set record data to form
+                $this->view->assign("MediaID", $arrData['MediaID']);
+                //var_dump($arrData);exit;
+                break;
+        }
+
+        $model = new Application_Model_Branch();
+        $this->view->assign("Branches", $model->getAll());
+
+        $model = new Application_Model_Media();
+        $this->view->assign("MediaList", $model->getAll());
+    }
+
+    public function saveAction() {
+    	$modelBranch = new Application_Model_Branch();
+    	$modelMedia  = new Application_Model_Media();    	
+    	
+        switch ($this->getRequest()->getParam("type")) {
+            case "Add":
+                $strBranchID = $this->getRequest()->getParam("BranchID");
+                $strMediaID = $this->getRequest()->getParam("MediaID");
+
+                // Check empty fields
+                if (!$strBranchID or !$strMediaID) {
+                    echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                    exit;
+                }
+
+                // Check duplicate MediaID
+                $result = $this->model->getSingle($strBranchID, $strMediaID);
+                if ($result["MediaID"] == $strMediaID) {
+                    echo "<script>window.parent.saveFailed('Media already exist!')</script>";
+                    break;
+                }
+
+                $arrBranches = array();
+                if ($strBranchID == "all") {                	
+                    $arrBranches = $modelBranch->getAllBranchID();
+                } else {
+                	$arrBranches[0]["BranchID"] = $strBranchID;
+                }
+                //var_dump($arrBranches);exit;
+
+                foreach ($arrBranches as $arrBranch) {
+	                $this->model->replace(
+	                        addslashes($arrBranch["BranchID"]),
+	                        addslashes($strMediaID)
+	                );
+	                
+	                // Send ftp request if this is a video
+	                $arrMedia = $modelMedia->getSingle($strMediaID);
+	                if ($arrMedia["MediaType"] == "video") {
+		                $branch = $modelBranch->getSingle($arrBranch["BranchID"]);
+		                $modelMedia->insertToFTP($branch["FTPAddress"], $branch["FTPUserName"], $branch["FTPPassword"], $arrBranch["BranchID"], $strMediaID, "media/video/" . $arrMedia["Content"]);
+	                }
+                }
+
+                if ($strBranchID == "all") {
+                	echo "<script>window.parent.saveSuccess();window.parent.location='/branchmedia'</script>";
+                } else  {
+                	echo "<script>window.parent.saveSuccess();window.parent.disableField('BranchID')</script>";
+                }
+                break;
+
+            case "Edit":
+                // Check empty fields
+                if (!$this->getRequest()->getParam("BranchID") or !$this->getRequest()->getParam("MediaID")) {
+                    echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                    exit;
+                }
+
+                // Check duplicate MediaID
+                if ($this->getRequest()->getParam("MediaID") != $this->getRequest()->getParam("OldMediaID")) {
+                    $result = $this->model->getSingleAnother($this->getRequest()->getParam("BranchID"), $this->getRequest()->getParam("OldMediaID"), $this->getRequest()->getParam("MediaID"));
+                    if ($result) {
+                        if ($this->getRequest()->getParam("MediaID") == $result["MediaID"]) {
+                            echo "<script>window.parent.saveFailed('Media already exist!')</script>";
+                            exit;
+                        }
+                    }
+                }
+
+                $this->model->update(
+                        addslashes($this->getRequest()->getParam("BranchID")),
+                        addslashes($this->getRequest()->getParam("OldMediaID")),
+                        addslashes($this->getRequest()->getParam("MediaID"))
+                );
+                
+                // Send ftp request if this is a video
+                $modelMedia = new Application_Model_Media();
+                $arrMedia = $modelMedia->getSingle($this->getRequest()->getParam("MediaID"));
+                if ($arrMedia["MediaType"] == "video") {
+	                $modelBranch = new Application_Model_Branch();
+	                $arrBranch = $modelBranch->getSingle($this->getRequest()->getParam("BranchID"));
+	                $modelMedia->insertToFTP($arrBranch["FTPAddress"], $arrBranch["FTPUserName"], $arrBranch["FTPPassword"], "/media/video/" . $arrMedia["Content"]);
+                }
+                
+                echo "<script>window.parent.editSuccess()</script>";
+                break;
+
+            case "Delete":
+            	$strBranchID = addslashes($this->getRequest()->getParam("branch_id"));
+            	$strMediaID  = addslashes($this->getRequest()->getParam("media_id"));
+            	
+            	// Get FTP details
+            	$modelBranch = new Application_Model_Branch();
+            	$arrBranch = $modelBranch->getSingle($strBranchID);
+            	
+            	// Get Media Details
+            	$modelMedia = new Application_Model_Media();
+            	$arrMedia = $modelMedia->getSingle($strMediaID);
+            	
+            	// Erase file on client via FTP via batch processing
+            	$modelMedia->insertToFTP($arrBranch["FTPAddress"], $arrBranch["FTPUserName"], $arrBranch["FTPPassword"], $arrMedia["Content"], "delete");            	
+            	
+                $this->model->delete($strBranchID, $strMediaID);
+                break;
+        }
+        exit;
+
+    }
+}
+

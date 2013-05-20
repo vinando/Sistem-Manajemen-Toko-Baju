@@ -1,0 +1,77 @@
+<div id="content_header"><h2>Reporting - Stock </h2></div>
+<hr>
+<?php
+echo '<br/><br/>';
+//echo count($this->data);
+if(count($this->data) > 0){
+    foreach ($this->data as $idx => $branchData) {
+        if(count($this->data) > 1) echo ($idx+1).'. ';
+        echo 'Cabang : ' . $branchData['branch']['name'].'<br/>';
+        ?>
+    <table id="table_list" cellspacing="1" cellpadding="5">
+    <thead>
+        <tr bgcolor="#FFFFFF">
+            <td colspan="12">&nbsp;</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr bgcolor="#d6d6d6">
+            <td align="center" width="10">No.</td>
+            <td align="center" width="100">Product Code</td>
+            <td align="center" width="170">Product Name</td>
+            <td align="center" width="120">Stock</td>
+            <td align="center" width="120">Action</td>
+        </tr>
+        <?php
+        $grandTotal = 0;
+        if(count($branchData['data']) > 0){
+            $i=0;
+            foreach ($branchData['data'] as $idx1 => $data){
+                $i++;
+                /*$grandTotal += $data['total'];*/
+                if($i%2 == 0) $bgcolor = "#e6e6fa";
+                else $bgcolor = "#f1f0f0";
+                ?>
+            <tr bgcolor="<?php echo $bgcolor; ?>">
+                <td align="left"><?php echo $i; ?></td>
+                <td align="left"><?php echo $data['code']; ?></td>
+                <td align="left"><?php echo $data['name']; ?></td>
+                <td align="right"><?php echo $data['stock']; ?></td>
+                <td align="center"><a href="#" onclick="javascript: return showDetail('<?php echo $branchData['branch']['id']; ?>', '<?php echo $data['productid'];?>');">Detail</a></td>
+            </tr>
+                <?php
+            }
+        }
+        else{
+            ?>
+        <tr bgcolor="#f1f0f0" style="color : red;">
+            <td align="center" colspan="12"><b>No data to display</b></td>
+        </tr>
+            <?php
+        }
+        ?>
+    </tbody>
+        <!--<tr>
+            <td colspan="5" align="right">Total :</td>
+            <td style="color: red;" align="right"><?php /*echo $grandTotal; */?></td>
+        </tr>-->
+    </table>
+    <br/><br/>
+    <?php
+    }
+}
+?>
+<div id="detailDialog"></div>
+<script type="text/javascript">
+    function showDetail(branchid, productid) {
+        url = '/rptstockopname/viewdetail/branchid/' + branchid + '/productid/' + productid;
+        //window.location = url;
+        $('#detailDialog').load(url).dialog({
+            modal   : true,
+            width   : 800,
+            height  : 600,
+            button  : 'close'
+        });
+        return false;
+    }
+</script>

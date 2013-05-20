@@ -1,0 +1,253 @@
+<div id="content_header"><h2>Reporting - Pemasukan</h2></div>
+<hr>
+<?php
+//print_r($this->data);
+echo '<br/>';
+echo 'Period Report: <b>'.$this->startdate. '</b> to <b>'.$this->enddate.'</b>';
+echo '<br/><br/>';
+//echo count($this->data);
+if(count($this->data) > 0){
+    foreach ($this->data as $idx => $branchData) {
+        if(count($this->data) > 1) echo ($idx+1).'. ';
+        echo '<u><b>Cabang : ' . $branchData['branch']['name'].'</b></u><br/>';
+        ?>
+    <table id="table_list" cellspacing="1" cellpadding="5">
+    <thead>
+        <tr bgcolor="#FFFFFF">
+            <td colspan="12">&nbsp;</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr bgcolor="#d6d6d6">
+            <td align="center" width="400">Pemasukan</td>
+            <td align="center" width="400">Pengeluaran</td>
+        </tr>
+    <?php
+        $totalPemasukan = 0;
+        $totalPengeluaran = 0;
+        $totalProfit = 0;
+        $orders = $branchData['order'];
+        $services = $branchData['service'];
+        $sales_orders = $branchData['sales_order'];
+
+        $finish_orders = $branchData['finish_order'];
+        $finish_services = $branchData['finish_service'];
+        $purchases_orders = $branchData['purchases_order'];
+        $daily_trns = $branchData['kas_harian'];
+    ?>
+        <tr>
+            <!-- Pemasukan-->
+            <td valign="top">
+                <!--Pemasukan dari order jahit-->
+                <table border="1" width="100%">
+
+                    <tr>
+                        <td colspan="2"><span style="background-color: #3399FF; padding: 2px;">Pesanan Jahit :</span></td>
+                    </tr>
+                    <?php
+                    //print_r($orders);
+                    $totalOrder = 0;
+                    foreach($orders as $idx => $order) { ?>
+                    <tr>
+                        <td width="300"><?php echo date('d-m-Y',strtotime($order['orderdate'])); ?></td>
+                        <td align="right"><?php echo $order['total']; ?></td>
+                    </tr>
+                    <?php
+                        $totalOrder += $order['total'];
+                    } ?>
+                    <tr>
+                        <td align="right">Total :</td>
+                        <td align="right"><?php echo $totalOrder;$totalPemasukan += $totalOrder;?></td>
+                    </tr>
+                </table>
+                <!--End order jahit-->
+                <br/>
+                <!--Pemasukan dari service-->
+                <table border="1" width="100%">
+
+                    <tr>
+                        <td colspan="2"><span style="background-color: #3399FF; padding: 2px;">Pesanan Service :</span></td>
+                    </tr>
+                    <?php
+                    //print_r($orders);
+                    $totalService = 0;
+                    foreach($services as $idx => $service) { ?>
+                        <tr>
+                            <td width="300"><?php echo date('d-m-Y',strtotime($service['trndate'])); ?></td>
+                            <td align="right"><?php echo $service['total']; ?></td>
+                        </tr>
+                        <?php
+                        $totalService += $service['total'];
+                    } ?>
+                    <tr>
+                        <td align="right">Total :</td>
+                        <td align="right"><?php echo $totalService;$totalPemasukan += $totalService;?></td>
+                    </tr>
+                </table>
+                <!--End service-->
+                <br/>
+                <!--Pemasukan dari sales order-->
+                <table border="1" width="100%">
+                    <tr>
+                        <td colspan="2"><span style="background-color: #3399FF; padding: 2px;">Pesanan Penjualan :</span></td>
+                    </tr>
+                    <?php
+                    //print_r($orders);
+                    $totalSalesOrder = 0;
+                    foreach($sales_orders as $idx => $sales_order) { ?>
+                        <tr>
+                            <td width="300"><?php echo date('d-m-Y',strtotime($sales_order['orderdate'])); ?></td>
+                            <td align="right"><?php echo $sales_order['total']; ?></td>
+                        </tr>
+                        <?php
+                        $totalSalesOrder += $sales_order['total'];
+                    } ?>
+                    <tr>
+                        <td align="right">Total :</td>
+                        <td align="right"><?php echo $totalSalesOrder;$totalPemasukan += $totalSalesOrder;?></td>
+                    </tr>
+                </table>
+                <!--End sales order-->
+                <br/>
+                <!--Pemasukan dari kas harian-->
+                <table border="1" width="100%">
+                    <tr>
+                        <td colspan="2"><span style="background-color: #3399FF; padding: 2px;">Pemasukan Lain :</span></td>
+                    </tr>
+                    <?php
+                    //print_r($orders);
+                    $totalPemasukanLain = 0;
+                    foreach($daily_trns as $idx => $trn) {
+                        if($trn['debit'] > 0) {
+                        ?>
+                        <tr>
+                            <td width="300"><?php echo date('d-m-Y',strtotime($trn['trndate'])); ?></td>
+                            <td align="right"><?php echo $trn['debit']; ?></td>
+                        </tr>
+                    <?php
+                        $totalPemasukanLain += $trn['debit'];
+                        }
+                    }
+                    ?>
+                    <tr>
+                        <td align="right">Total :</td>
+                        <td align="right"><?php echo $totalPemasukanLain;$totalPemasukan += $totalPemasukanLain;?></td>
+                    </tr>
+                </table>
+                <!--End kas harian-->
+            </td>
+            <!-- End Pemasukan-->
+
+            <!-- Pengeluaran -->
+            <td valign="top">
+                <!--Pengeluaran dari Finished Order-->
+                <table border="1" width="100%">
+                    <tr>
+                        <td colspan="2"><span style="background-color: #3399FF; padding: 2px;">Finished Order :</span></td>
+                    </tr>
+                    <?php
+                    //print_r($orders);
+                    $totalFinishOrder = 0;
+                    foreach($finish_orders as $idx => $finish_order) { ?>
+                        <tr>
+                            <td width="300"><?php echo date('d-m-Y',strtotime($finish_order['finishdate'])); ?></td>
+                            <td align="right"><?php echo $finish_order['price']; ?></td>
+                        </tr>
+                        <?php
+                        $totalFinishOrder += $finish_order['price'];
+                    } ?>
+                    <tr>
+                        <td align="right">Total :</td>
+                        <td align="right"><?php echo $totalFinishOrder;$totalPengeluaran += $totalFinishOrder;?></td>
+                    </tr>
+                </table>
+                <!--End finish order-->
+                <br/>
+                <!--Pengeluaran dari Finished Service-->
+                <table border="1" width="100%">
+                    <tr>
+                        <td colspan="2"><span style="background-color: #3399FF; padding: 2px;">Finished Service :</span></td>
+                    </tr>
+                    <?php
+                    $totalFinishService = 0;
+                    foreach($finish_services as $idx => $finish_service) { ?>
+                        <tr>
+                            <td width="300"><?php echo date('d-m-Y',strtotime($finish_service['finishdate'])); ?></td>
+                            <td align="right"><?php echo $finish_service['price']; ?></td>
+                        </tr>
+                        <?php
+                        $totalFinishService += $finish_service['price'];
+                    } ?>
+                    <tr>
+                        <td align="right">Total :</td>
+                        <td align="right"><?php echo $totalFinishService;$totalPengeluaran += $totalFinishService;?></td>
+                    </tr>
+                </table>
+                <!--End finish service-->
+                <br/>
+                <!--Pengeluaran dari Purchases Order-->
+                <table border="1" width="100%">
+                    <tr>
+                        <td colspan="2"><span style="background-color: #3399FF; padding: 2px;">Pesanan Pembelian :</span></td>
+                    </tr>
+                    <?php
+                    //print_r($orders);
+                    $totalPurchasesOrder = 0;
+                    foreach($purchases_orders as $idx => $purchases_order) { ?>
+                        <tr>
+                            <td width="300"><?php echo date('d-m-Y',strtotime($purchases_order['orderdate'])); ?></td>
+                            <td align="right"><?php echo $purchases_order['total']; ?></td>
+                        </tr>
+                        <?php
+                        $totalPurchasesOrder += $purchases_order['total'];
+                    } ?>
+                    <tr>
+                        <td align="right">Total :</td>
+                        <td align="right"><?php echo $totalPurchasesOrder;$totalPengeluaran += $totalPurchasesOrder;?></td>
+                    </tr>
+                </table>
+                <!--End purchases order-->
+                <br/>
+                <!--Pengeluaran dari kas harian-->
+                <table border="1" width="100%">
+                    <tr>
+                        <td colspan="2"><span style="background-color: #3399FF; padding: 2px;">Pengeluaran Lain :</span></td>
+                    </tr>
+                    <?php
+                    //print_r($orders);
+                    $totalPengeluaranLain = 0;
+                    foreach($daily_trns as $idx => $trn) {
+                        if($trn['credit'] > 0) {
+                            ?>
+                            <tr>
+                                <td width="300"><?php echo date('d-m-Y',strtotime($trn['trndate'])); ?></td>
+                                <td align="right"><?php echo $trn['credit']; ?></td>
+                            </tr>
+                            <?php
+                            $totalPengeluaranLain += $trn['credit'];
+                        }
+                    }
+                    ?>
+                    <tr>
+                        <td align="right">Total :</td>
+                        <td align="right"><?php echo $totalPengeluaranLain;$totalPengeluaran += $totalPengeluaranLain;?></td>
+                    </tr>
+                </table>
+                <!--End kas harian-->
+            </td>
+            <!-- End Pengeluaran -->
+        </tr>
+    </tbody>
+        <tr>
+            <td align="right">Total Pemasukan Cabang: <span style="color: red"><?php echo $totalPemasukan; ?></span></td>
+            <td align="right">Total Pengeluaran Cabang: <span style="color: red"><?php echo $totalPengeluaran; ?></span></td>
+        </tr>
+        <tr>
+            <td colspan="2" align="right"><u><b>Total Branch Profit:</b></u> <span style="color: red"><?php echo $totalProfit = $totalPemasukan - $totalPengeluaran; ?></span></td>
+        </tr>
+    </table>
+    <br/><br/><br/>
+    <?php
+    }
+}
+?>

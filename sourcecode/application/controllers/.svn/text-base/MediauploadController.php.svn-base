@@ -1,0 +1,172 @@
+<?php
+
+class MediauploadController extends Zend_Controller_Action {
+    private $model;
+
+    public function init() {
+        $this->model = new Application_Model_Media();
+
+        $this->view->AccordionID  = "Master";
+        $this->view->SelectedMenu = "Media";
+    }
+
+    public function preDispatch() {
+    	if (!Zend_Auth::getInstance()->hasIdentity()) {
+    	    $this->_helper->redirector('login', '');
+        }
+    }
+
+    public function indexAction(){
+    }
+
+    public function dataAction() {
+        echo json_encode($this->model->getDataTable());
+    	exit;
+    }
+
+    public function formAction(){
+        switch ($this->getRequest()->getParam("type")) {
+            case "add";
+                $this->view->assign("strFormType", "Add");
+                $this->view->assign("strMediaID", "Automatic");
+                break;
+
+            case "edit":
+                $this->view->assign("strFormType", "Edit");
+                $this->view->assign("strMediaID", $this->getRequest()->getParam("id"));
+
+                $arrData = $this->model->getSingle($this->getRequest()->getParam("id"));
+
+                // Set record data to form
+                $this->view->assign("MediaType", $arrData['MediaType']);
+                $this->view->assign("ContentText", $arrData['Content']);
+
+                break;
+        }
+
+    }
+
+    public function saveAction() {
+
+        switch ($this->getRequest()->getParam("type")) {
+            case "Add":
+                $strContent = "";
+                $strOriginalName = "";
+
+                // Check empty fields
+                if ($this->getRequest()->getParam("MediaType") == "video") {
+                    if (!$_FILES["ContentVideo"]['name']) {
+                        echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                        exit;
+                    }
+
+                    $strOriginalName = $_FILES["ContentVideo"]['name'];
+                    //echo "<script>window.parent.saveFailed('bla bla bla')</script>";
+                    //exit;
+                }
+
+                if ($this->getRequest()->getParam("MediaType") == "text") {
+                    if (!$this->getRequest()->getParam("ContentText")) {
+                        echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                        exit;
+                    } else {
+                        $strContent = addslashes($this->getRequest()->getParam("ContentText"));
+                    }
+                }
+
+                $strMediaID = $this->model->insert($this->getRequest()->getParam("MediaType"), $strContent, $strOriginalName);
+
+                // Upload to folder
+                if ($this->getRequest()->getParam("MediaType") == "video") {
+                    $strContent = "video_" . $strMediaID . "." . IGLO_String::getFileExtension($_FILES["ContentVideo"]['name']);
+                    move_uploaded_file($_FILES['ContentVideo']['tmp_name'], "media/video/$strContent");
+
+                    $this->model->update($strMediaID, $this->getRequest()->getParam("MediaType"), $strContent, $strOriginalName);
+                }
+
+                if ($strMediaID) {
+                    echo "<script>window.parent.saveSuccess('MediaID', $strMediaID)</script>";
+                } else {
+                    echo "<script>window.parent.saveFailed('Save failed')</script>";
+                }
+                break;
+
+            case "Edit":
+                $strContent = "";
+                $strOriginalName = "";
+                // Check empty fields
+                if (!$this->getRequest()->getParam("MediaID")) {
+                    echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                    exit;
+                }
+                if ($this->getRequest()->getParam("MediaType") == "video") {
+                    if (!$_FILES["ContentVideo"]['name']) {
+                        echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                        exit;
+                    }
+                    $strOriginalName = $_FILES["ContentVideo"]['name'];
+                }
+                if ($this->getRequest()->getParam("MediaType") == "text") {
+                    if (!$this->getRequest()->getParam("ContentText")) {
+                        echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                        exit;
+                    } else {
+                        $strContent = addslashes($this->getRequest()->getParam("ContentText"));
+                    }
+                }
+
+                $strMediaID = $this->getRequest()->getParam("MediaID");
+
+                // Upload to folder
+                if ($this->getRequest()->getParam("MediaType") == "video") {
+                    // Delete old content
+                    $arrMedia = $this->model->getSingle($this->getRequest()->getParam("MediaID"));
+                    @unlink("media/video/" . $arrMedia["Content"]);
+
+                    $strContent = "video_" . $strMediaID . "." . IGLO_String::getFileExtension($_FILES["ContentVideo"]['name']);
+                    move_uploaded_file($_FILES['ContentVideo']['tmp_name'], "media/video/$strContent");
+                }
+
+                $this->model->update($strMediaID, $this->getRequest()->getParam("MediaType"), $strContent, $strOriginalName);
+
+                echo "<script>window.parent.editSuccess()</script>";
+                break;
+
+            case "Delete":
+                $arrMedia = $this->model->getSingle($this->getRequest()->getParam("media_id"));
+                $this->model->delete(addslashes($this->getRequest()->getParam("media_id")));
+                @unlink("media/video/" . $arrMedia["Content"]);
+                break;
+        }
+        exit;
+
+    }
+
+    public function previewAction() {
+        $arrData = $this->model->getSingle($this->getRequest()->getParam("id"));
+        echo json_encode($arrData);
+        exit;
+        /*if ($arrData["MediaType"] == "video") {
+            echo '
+            <script type="text/javascript" src="/js/jplayer/jquery.jplayer.min.js"></script>
+            <script>
+                $("#divPreview").jPlayer({
+                    ready: function(event) {
+                        $(this).jPlayer("setMedia", {
+                            ogv: "/media/video/' . $arrData["Content"] . '"
+                        });
+                        $(this).jPlayer("play");
+                    },
+                    supplied: "ogv",
+                    swfPath: "/js/jplayer",
+                    size: {width: "500px", height: "500px"}
+                });
+             </script>
+            ';
+        } else {
+            echo $arrData["Content"];
+        }
+        exit;*/
+    }
+}
+

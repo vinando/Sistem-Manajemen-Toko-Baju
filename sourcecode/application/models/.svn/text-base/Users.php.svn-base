@@ -1,0 +1,139 @@
+<?php
+
+class Application_Model_Users
+{
+	protected $_userid;
+	protected $_password; 
+	protected $_fullname;
+	protected $_email;
+	protected $_branchid;
+	protected $_createby;
+	protected $_createdate;
+	protected $_updateby;
+	protected $_updatedate;
+	
+	public function __construct(array $options = null)
+    {
+        if (is_array($options)) {
+            $this->setOptions($options);
+        }
+    } 
+    public function __set($name, $value)
+    {
+        $method = 'set' . $name;
+        if (('mapper' == $name) || !method_exists($this, $method)) {
+            throw new Exception('Invalid property');
+        }
+        $this->$method($value);
+    } 
+    public function __get($name)
+    {
+        $method = 'get' . $name;
+        if (('mapper' == $name) || !method_exists($this, $method)) {
+            throw new Exception('Invalid property');
+        }
+        return $this->$method();
+    }
+    public function setOptions(array $options)
+    {
+        $methods = get_class_methods($this);
+        foreach ($options as $key => $value) {
+            $method = 'set' . ucfirst($key);
+            if (in_array($method, $methods)) {
+                $this->$method($value);
+            }
+        }
+        return $this;
+    }
+    public function setUserid($text)
+    {
+        $this->_userid = (string) $text;
+        return $this;
+    }
+ 
+    public function getUserid()
+    {
+        return $this->_userid;
+    }
+    
+    public function setPassword($text)
+    {
+        $this->_password = (string) $text;
+        return $this;
+    } 
+    public function getPassword()
+    {
+        return $this->_password;
+    }
+    
+    public function setFullname($text)
+    {
+        $this->_fullname = (string) $text;
+        return $this;
+    } 
+    public function getFullname()
+    {
+        return $this->_fullname;
+    }
+    
+    public function setEmail($text)
+    {
+        $this->_email = (string) $text;
+        return $this;
+    } 
+    public function getEmail()
+    {
+        return $this->_email;
+    }
+    
+    public function setBranchid($text)
+    {
+        $this->_branchid = (string) $text;
+        return $this;
+    } 
+    public function getBranchid()
+    {
+        return $this->_branchid;
+    }
+    
+    public function setCreateby($text)
+    {
+        $this->_createby = (string) $text;
+        return $this;
+    } 
+    public function getCreateby()
+    {
+        return $this->_createby;
+    }
+    
+    public function setCreatedate($text)
+    {
+        $this->_createdate = (string) $text;
+        return $this;
+    } 
+    public function getCreatedate()
+    {
+        return $this->_createdate;
+    }
+    
+    public function setUpdateby($text)
+    {
+        $this->_updateby = (string) $text;
+        return $this;
+    } 
+    public function getUpdateby()
+    {
+        return $this->_updateby;
+    }
+    
+    public function setUpdatedate($text)
+    {
+        $this->_updatedate = (string) $text;
+        return $this;
+    } 
+    public function getUpdatedate()
+    {
+        return $this->_updatedate;
+    }
+}
+

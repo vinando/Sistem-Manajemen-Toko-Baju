@@ -1,0 +1,130 @@
+<?php
+
+class LoginController extends Zend_Controller_Action {
+    private $model;
+
+    public function init() {
+        $this->model = new Application_Model_User();
+        $helper = $this->_helper->getHelper('Layout');
+        $layout = $helper->getLayoutInstance();
+        $layout->setLayout("layout_login");
+    }
+    public function submitAction() {
+        if (!$this->getRequest()->getParam("UserID") or !$this->getRequest()->getParam("Password")) {
+            echo "<script>parent.loginFailed('Please input UserID and Password first!')</script>";
+            exit;
+        }
+
+        if (preg_match("/[^\d\w\\-_]+/", $this->getRequest()->getParam("UserID")) or preg_match("/[^\d\w]+/", $this->getRequest()->getParam("Password"))) {
+            echo "<script>parent.loginFailed('Invalid charactes!')</script>";
+            exit;
+        }
+
+        $arrUser = $this->model->getSingleByUserIDPassword($this->getRequest()->getParam("UserID"), $this->getRequest()->getParam("Password"));
+
+        if ($arrUser['BranchID'] != "" and $arrUser['BranchID'] != $this->getRequest()->getParam("BranchID")) {
+            echo "<script>parent.loginFailed('You are not authorized to login on this Branch!')</script>";
+            exit;
+        }
+
+        if ($arrUser["UserID"] == $this->getRequest()->getParam("UserID") and $arrUser['Password'] == md5($this->getRequest()->getParam("Password"))) {
+            if ($this->authenticate($this->getRequest())) {
+
+                // Save user credential to session
+                $_SESSION['UserID'] = $this->getRequest()->getParam("UserID");
+                $_SESSION['BranchID'] = $this->getRequest()->getParam("BranchID");
+
+                // Save FullName to session
+                $modelUser = new Application_Model_User();
+                $arrUser = $modelUser->getSingle($_SESSION['UserID']);
+                $_SESSION['FullName'] = $arrUser['FullName'];
+
+                // Save BranchName to session
+                $modelBranch = new Application_Model_Branch();
+                $arrBranch = $modelBranch->getSingle($_SESSION['BranchID']);
+                $_SESSION['BranchName']     = $arrBranch['BranchName'];
+                $_SESSION['BranchTimeZone'] = $arrBranch['BranchTimeZone'];
+
+                // Save Controllers Access Rights
+                $arrRightsTmp = $this->model->getAllRightsByUserID($this->getRequest()->getParam("UserID"));
+                $arrRights = array("rights");
+                if (count($arrRightsTmp) > 0) {
+                    foreach ($arrRightsTmp as $arrRightTmp) {
+                        array_push($arrRights, $arrRightTmp["Controller"]);
+                    }
+                }
+                $_SESSION['Rights'] = $arrRights;
+
+                $_SESSION['LoginTime'] = date("M, d Y H:i:s");
+
+                echo "<script>parent.location='/home';</script>";
+            } else {
+                echo "<script>parent.loginFailed('Account not found!')</script>";
+            }
+        } else {
+            echo "<script>parent.loginFailed('Account not found!')</script>";
+            exit;
+        }
+        exit;
+    }
+
+    public function authenticate($request) {
+        Zend_Loader::loadClass('Zend_Auth_Adapter_DbTable');
+
+        $dbAdapter   = Zend_Registry::get('DB');
+        $authAdapter = new Zend_Auth_Adapter_DbTable($dbAdapter);
+        $auth        = Zend_Auth::getInstance();
+
+        $authAdapter->setTableName('mst_user');
+        $authAdapter->setIdentityColumn('UserID');
+        $authAdapter->setCredentialColumn('Password');
+
+        $authAdapter->setIdentity($request->getParam("UserID"));
+        $authAdapter->setCredential($request->getParam("Password"));
+        $authAdapter->setCredentialTreatment('MD5(?)');
+        $result = $auth->authenticate($authAdapter);
+
+        if ($result->isValid()) {
+            $data = $authAdapter->getResultRowObject(null,'password');
+            $auth->getStorage()->write($data);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function preDispatch() {
+    	if (Zend_Auth::getInstance()->hasIdentity()) {
+            // If the user is logged in, we don't want to show the login form;
+            // however, the logout action should still be available
+            if ('logout' != $this->getRequest()->getActionName()) {
+                $this->_helper->redirector('home', '');
+            }
+        }
+    }
+
+    public function indexAction() {
+        $model = new Application_Model_Branch();
+        $this->view->assign("Branches", $model->getAll());
+    }
+
+    public function logoutAction() {
+        // Check if user still has checkin session and do chekout if possible
+        $model = new Application_Model_Countersession();
+        $userCheckinSession = $model->getSingleByUserIDByLoginTime($_SESSION['UserID'], $_SESSION['BranchID'], date("Y-m-d H:i:s"));
+        if ($userCheckinSession) {
+        	$model->updateCheckout($userCheckinSession["SessionID"], $_SESSION['UserID']);
+        }
+
+        // Remove session and authentication
+        Zend_Auth::getInstance()->clearIdentity();
+
+        // back to login page
+        $this->_helper->redirector('login', '');
+    }
+}
+
+
+
+
+

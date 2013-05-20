@@ -1,0 +1,12 @@
+<div id="content_header"><h2>News Details</h2><div style="float:right"><h2 id="form_type"><?php echo $this->strFormType;?> Record</h2></div></div>
+<hr></hr>
+<table id="table_form">    
+    <tr>
+        <td><b><?php echo $this->NewsTitle ?></b></td>
+    </tr>
+    <tr>
+        <td><?php echo stripslashes($this->NewsDesc) ?></td>
+    </tr>
+</table>
+<hr>
+<input type="button" value="Close" id="btn_close" onclick="window.location='/home'" class="button">

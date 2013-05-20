@@ -1,0 +1,144 @@
+<?php
+
+class FrontlinersController extends Zend_Controller_Action {
+    private $model;
+    private $strUserID;
+    private $strUserBranchID;
+
+    public function init() {
+        $this->model = new Application_Model_Branch();
+
+        $this->view->AccordionID  = "Frontliners";
+        $this->view->SelectedMenu = "Frontliners";
+    }
+
+    public function preDispatch() {
+    	if (!Zend_Auth::getInstance()->hasIdentity()) {
+    	    $this->_helper->redirector('login', '');
+        }
+    }
+
+    public function indexAction(){
+        $helper = $this->_helper->getHelper('Layout');
+        $layout = $helper->getLayoutInstance();
+        $layout->setLayout("layout_frontliners");
+
+        // Check rights
+        $model = new Application_Model_Branchfrontliners();
+        $counterRights =  $model->getSingle($_SESSION['BranchID'], $_SESSION['UserID']);
+        if (!$counterRights) {
+            $this->_helper->redirector('disable', 'frontliners');
+        }
+
+        // Check if user still has checkin session
+        $model = new Application_Model_Countersession();
+        // Get branch current time accoding to timezone
+        $strCurrTime = date("Y-m-d H:i:s", strtotime(date("Y-m-d H:i:s")) - ((7 - $_SESSION['BranchTimeZone']) * 3600));
+        $userCheckinSession = $model->getSingleByUserIDByLoginTime($_SESSION['UserID'], $_SESSION['BranchID'], $strCurrTime);
+        if (!$userCheckinSession) {
+            $this->_helper->redirector('checkin', 'frontliners');
+        }
+
+        $strBranchID    = $_SESSION['BranchID'];
+        $strBranchName  = $_SESSION['BranchName'];
+        $strUserID      = $_SESSION['UserID'];
+        $strFullName    = $_SESSION['FullName'];
+        $strCounterNo   = $userCheckinSession["CounterNo"];
+
+        // Get counter type
+        $modelBranchCounter = new Application_Model_Branchcounter();
+        $arrBranchCounter = $modelBranchCounter->getSingle($strBranchID, $strCounterNo);
+        $strCounterType   = $arrBranchCounter["TicketCategoryName"];
+        $strCounterTypeID = $arrBranchCounter["TicketCategoryID"];
+
+        // Check if there is a called customer hanging
+        $modelTicket = new Application_Model_Ticket();
+        $arrCacheTicket = $modelTicket->getSingleByBranchIDByCounterNoByStatus($strBranchID, $strCounterNo, "called");
+        if ($arrCacheTicket) {
+            $this->view->assign("TicketID", $arrCacheTicket['TicketID']);
+            $this->view->assign("TicketNo", $arrCacheTicket['TicketNo']);
+            $this->view->assign("TicketStatus", $arrCacheTicket['Status']);
+            //var_dump($arrCacheTicket);
+        }
+
+        $this->view->assign("BranchID", $strBranchID);
+        $this->view->assign("BranchName", $strBranchName);
+        $this->view->assign("UserID", $strUserID);
+        $this->view->assign("FullName", $strFullName);
+        $this->view->assign("CounterNo", $strCounterNo);
+        $this->view->assign("CounterType", $strCounterType);
+        $this->view->assign("CounterTypeID", $strCounterTypeID);
+
+        $arrBranchTicketCategories = $modelBranchCounter->getAllTicketCategory($strBranchID);
+        $this->view->assign("TicketCategories", $arrBranchTicketCategories);
+
+        // Get relations
+        $modelRelations = new Application_Model_Relation();
+        $arrRelations = $modelRelations->getAll();
+        $this->view->assign("Relations", $arrRelations);
+
+        $modelServiceType = new Application_Model_Servicetype();
+        $arrServiceTypes = $modelServiceType->getAll();
+        $this->view->assign("ServiceTypes", $arrServiceTypes);
+    }
+
+    public function checkinAction() {
+        // Displaying counter for checkin
+        $modelBranchCounter = new Application_Model_Branchcounter();
+        $arrBranchCounters = $modelBranchCounter->getAllByBranchID($_SESSION['BranchID']);
+        if ($arrBranchCounters) {
+            $this->view->assign("Counters", $arrBranchCounters);
+
+            $arrFrontliners = array();
+            $model2 = new Application_Model_Countersession();
+            foreach ($arrBranchCounters as $arrBranchCounter) {
+                // Get branch current time accoding to timezone
+                $strCurrTime = date("Y-m-d H:i:s", strtotime(date("Y-m-d H:i:s")) - ((7 - $_SESSION['BranchTimeZone']) * 3600));
+                $arrFrontliner = $model2->getSingleByCounterNoByLoginTime($_SESSION['BranchID'], $strCurrTime, $arrBranchCounter["CounterNo"]);
+                if ($arrFrontliner) {
+                    $arrFrontliners[$arrBranchCounter["CounterNo"]] = $arrFrontliner["FullName"];
+                }
+            }
+            $this->view->assign("Frontliners", $arrFrontliners);
+            //var_dump($arrFrontliners);
+            //var_dump($_SESSION);exit;
+        }
+    }
+
+    public function disableAction() {
+
+    }
+
+    public function confirmcheckinAction() {
+        if ($this->getRequest()->getParam("counter_no")) {
+            // Recheck if no logged user
+            //.. code here pls
+
+            // Get branch current time accoding to timezone
+            $strCurrTime = date("Y-m-d H:i:s", strtotime(date("Y-m-d H:i:s")) - ((7 - $_SESSION['BranchTimeZone']) * 3600));
+
+            $model = new Application_Model_Countersession();
+            $id = $model->insert($_SESSION['BranchID'], $this->getRequest()->getParam("category"), $this->getRequest()->getParam("counter_no"), $_SESSION['UserID'], $strCurrTime);
+            if ($id) {
+                $this->_helper->redirector('index', 'frontliners');
+            }
+        }
+    }
+
+    public function confirmcheckoutAction() {
+        // Get branch current time accoding to timezone
+        $strCurrTime = date("Y-m-d H:i:s", strtotime(date("Y-m-d H:i:s")) - ((7 - $_SESSION['BranchTimeZone']) * 3600));
+
+        // Check if user still has checkin session
+        $model = new Application_Model_Countersession();
+        $userCheckinSession = $model->getSingleByUserIDByLoginTime($_SESSION['UserID'], $_SESSION['BranchID'], $strCurrTime);
+        //var_dump($userCheckinSession);exit;
+        if ($userCheckinSession) {
+            //echo "$userCheckinSession";exit;
+            // Get branch current time accoding to timezone
+            $strCurrTime = date("Y-m-d H:i:s", strtotime(date("Y-m-d H:i:s")) - ((7 - $_SESSION['BranchTimeZone']) * 3600));
+            $model->updateCheckout($userCheckinSession["SessionID"], $_SESSION['UserID'], $strCurrTime);
+        }
+    }
+}
+

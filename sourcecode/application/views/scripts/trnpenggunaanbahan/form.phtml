@@ -1,0 +1,202 @@
+<script type="text/javascript">
+    function showLookup(view) {
+        //alert('asd');
+        url = '/lookup/' + view;
+        $('#lookup').load(url).dialog({
+            modal   : true,
+            width   : 1024,
+            height  : 600,
+            button  : 'close',
+            closeText: 'Close'
+        });
+        return false;
+    }
+</script>
+
+<div id="content_header"><h2>Transaction - Using Of Raw Material</h2><div style="float:right"><h2 id="form_type"><?php echo $this->strFormType;?> Record</h2></div></div>
+<hr>
+
+<form id="form" method="POST" action="/trnpenggunaanbahan/save" class="form_element" enctype="multipart/form-data" target="form_iframe">
+
+    <table id="table_form">
+        <tr>
+            <td>Trn. ID</td>
+            <td><input type="text" name="ID" id="ID" size="20" readonly value="<?php echo $this->strID;?>" class="readonlytext"></td>
+        </tr>
+        <tr>
+            <td>Branch ID</td>
+            <td><input type="text" name="BranchID" id="BranchID" size="20" readonly value="<?php echo $_SESSION['BranchID'];?>" class="readonlytext"></td>
+        </tr>
+        <tr>
+            <td>Order ID</td>
+            <td>
+                <label for="OrderId"></label> <input type="text" name="OrderId" id="OrderId" size="20" readonly size="10" value="<?php echo ($this->strFormType == 'Edit') ? $this->OrderId : '' ?>" class="readonlytext">
+                <input type="button" name="orderLookup" id="orderLookup" value="Order Lookup" onclick="javascript:return showLookup('order');">
+            </td>
+        </tr>
+        <tr>
+            <td>Order No</td>
+            <td><label for="OrderNo"></label> <input type="text" name="OrderNo" id="OrderNo" size="20" readonly size="10" value="<?php echo ($this->strFormType == 'Edit') ? $this->OrderNo : '' ?>" class="readonlytext"></td>
+        </tr>
+        <tr>
+            <td>Trn. No</td>
+            <td><label for="TrnNo"></label> <input type="text" name="TrnNo" id="TrnNo" size="20" readonly value="<?php echo ($this->strFormType == 'Edit') ? $this->TrnNo : 'Auto Generate' ?>" class="readonlytext"></td>
+        </tr>
+        <tr>
+            <td>Trn. Date</td>
+            <td><label for="TrnDate"></label> <input type="text" name="TrnDate" id="TrnDate" size="20" readonly value="<?php echo ($this->strFormType == 'Edit') ? $this->TrnDate : 'Auto Generate' ?>" class="readonlytext"></td>
+        </tr>
+    </table>
+    <br/>
+    <table id="table_form_dt" width="80%">
+        <tr>
+            <td colspan="5">Transaction Detail :</td>
+        </tr>
+        <tr class="rHeader">
+            <td>Product</td>
+            <td>Qty.</td>
+            <td>Action</td>
+        </tr>
+        <tr class="rHeader">
+            <td>
+                <label for="ProductID"></label>
+                <select name="ProductID" id="ProductID" class="dropdown">
+                    <option value="">--</option>
+                    <?php
+                    foreach ($this->Products as $arrProduct) {
+                        ?>
+                        <option value="<?php echo $arrProduct["id"];?>"><?php echo $arrProduct["code"].'|'.$arrProduct["name"]?></option>
+                        <?php
+                    }
+                    ?>
+                </select>
+            </td>
+            <td><label for="Qty"></label> <input type="text" name="Qty" id="Qty" size="10" value="" class=""></td>
+            <td><input type="button" name="btnAddDetail" id="btnAddDetail" value="Add"></td>
+        </tr>
+        <tbody id="tbody">
+        <?php
+        foreach($this->Items as $idx => $item) {
+        ?>
+        <tr id="row_<?php echo $idx;?>">
+            <td id="product_<?php echo $idx;?>"><?php echo $item['productid'] . '|' . $item['productcode'] . '|' . $item['productname'];?></td>
+            <td id="qty_<?php echo $idx;?>"><?php echo $item['amount'];?></td>
+            <td><a href="#" onclick="deleteRowDetail('<?php echo $idx;?>');">Delete</a></td>
+        </tr>
+        <?php
+            $idx++;
+        }
+        ?>
+        </tbody>
+    </table>
+
+<hr>
+<div id="form_save_result" class="form_save_success">Save successful</div>
+<input type="hidden" name="type" id="type" value="<?php echo $this->strFormType; ?>">
+<input type="hidden" id="numrows" name="numrows" value="<?php echo $this->NumRows ?>">
+<input type="button" value="Save" id="btn_save" class="button" onclick="javascript:save_form();">
+<input type="button" value="New" id="btn_new" class="button" onclick="window.location='/trnpenggunaanbahan/form/type/add'">
+<input type="button" value="Delete" id="btn_delete" class="button">
+<input type="button" value="Close" id="btn_close" onclick="window.location='/trnpenggunaanbahan'" class="button">
+</form>
+<iframe id="form_iframe" name="form_iframe" src="" style="width:100%;height:200px;border:0px solid #FFFFFF;"></iframe>
+
+<div id="dialog-modal" title="Attention" style="display:none"></div>
+
+<div id="dialog-confirm" title="Delete record?" style="display:none">
+	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This record will be permanently deleted and cannot be recovered. Are you sure?</p>
+</div>
+
+<div id="lookup" title="Lookup"></div>
+
+<script type="text/javascript">
+    $('#btnAddDetail').click(function() {
+        rowNum = parseInt(document.getElementById('numrows').value);
+        product = $('#ProductID').val() + '|' + $('#ProductID option:selected').text();
+        qty = $('#Qty').val();
+        //alert(product);
+        $('#tbody').append(
+            '<tr id="row_' + rowNum + '">' +
+                '<td id="product_' + rowNum + '">' + product + '</td>' +
+                '<td id="qty_' + rowNum + '">' + qty + '</td>' +
+                '<td><a href="#" onclick="deleteRowDetail(' + rowNum + ');">Delete</a></td>' +
+            '</tr>');
+        rowNum++;
+        document.getElementById('numrows').value = rowNum;
+    });
+
+    function deleteRowDetail(rowid) {
+        //alert(rowid);
+        $('#row_' + rowid).remove();
+        document.getElementById('numrows').value = parseInt(document.getElementById('numrows').value) - 1;
+    }
+
+    function save_form(){
+        //array data header
+        data = Object();
+
+        data['ID'] = $('#ID').val();
+        data['BranchID'] = $('#BranchID').val();
+        data['OrderId'] = $('#OrderId').val();
+        data['OrderNo'] = $('#OrderNo').val();
+        data['TrnNo'] = $('#TrnNo').val();
+        data['TrnDate'] = $('#TrnDate').val();
+
+        //array data detail
+        data.items = new Object();
+        numrows = parseInt($('#numrows').val());
+        //alert(numrows);
+        //return false;
+        count = 0;
+        for(i=0; i<numrows; i++){
+            //alert(i);
+            if($('#row_' + i) != null){
+                if( $('#row_' + i).html() != '' && $('#row_' + i).html() != null){
+                    data.items[i] ={
+                        "product" : $('#product_' + i).html(),
+                        "qty" : $('#qty_' + i).html()
+                    };
+                }
+            }
+        }
+        obj = JSON.stringify(data);
+        //alert(obj);
+        $.ajax({
+            url: '/trnpenggunaanbahan/save/type/' + $('#type').val(),
+            type: 'POST',
+            data : {jsonstring : obj},
+            success : function(msg){
+                //alert(msg);
+                window.location = "/trnpenggunaanbahan";
+            }
+        });
+        return false;
+    }
+
+    $('#btn_delete').click(function() {
+        if ($('#type').val() == "Add") {
+            return;
+        }
+
+        $( "#dialog-confirm" ).dialog({
+            resizable: false,
+            height:200,
+            modal: true,
+            buttons: {
+                "Delete record": function() {
+                    $( this ).dialog("close");
+                    $.get("/trnpenggunaanbahan/save/type/Delete/ID/" + $('#ID').val(), function() {
+                        window.location = '/trnorder';
+                    });
+                },
+                Cancel: function() {
+                    $( this ).dialog("close");
+                }
+            }
+        });
+    });
+
+    var strTrnID = $('#ID').val();
+
+    $("#form").validate();
+</script>

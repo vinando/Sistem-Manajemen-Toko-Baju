@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Toko Jaket Kulit Kalong</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link type="text/css" href="/css/smoothness/jquery-ui-1.8.19.custom.css" rel="Stylesheet" />
+        <link type="text/css" href="/css/jquery.dataTables.css" rel="Stylesheet" />
+        <link type="text/css" href="/css/jquery.dataTables_themeroller.css" rel="Stylesheet" />
+        <link type="text/css" href="/css/style.css" rel="Stylesheet" />
+        <script type="text/javascript" src="/js/jquery-1.7.2.min.js"></script>
+        <script type="text/javascript" src="/js/jquery-ui-1.8.19.custom.min.js"></script>
+        <script type="text/javascript" src="/js/jquery.dataTables.min.js"></script>
+        <script type="text/javascript" src="/js/jquery.printElement.js"></script>
+        <script type="text/javascript" src="/js/main.js"></script>
+        <script type="text/javascript" src="/js/urlEncode.js"></script>
+        <script type="text/javascript" src="/js/jquery.validate.min.js"></script>
+        <script type="text/javascript" src="/js/ckeditor/ckeditor.js"></script>
+    </head>
+    <body>
+        <table width="100%" height="100%" id="main_container">
+            <tr>
+                <td colspan="2" id="pane_top">
+                    <table border="0" cellpadding="0" cellspacing="0">
+                        <tr>
+                            <td><img src="/images/logo.png"></td>
+                            <td valign="bottom" style="padding-bottom:15px;"><h1>SISTEM TRANSAKSI TOKO</h1><br>Jaket Kulit Kalong</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td id="pane_left" valign="top">
+                    <div id="main_menu">
+                        <h3><a href="#" class="menu_header">Account</a></h3>
+                        <div style="padding-top:0">
+                            <ul class="main_menu">
+                                <li class="main_menu_item"><a href="/home" class="main_menu_item<?php if ($this->SelectedMenu == "Home"){echo "_selected";}?>">Home</a></li>
+                                <li class="main_menu_item"><a href="/changepassword" class="main_menu_item<?php if ($this->SelectedMenu == "ChangePassword"){echo "_selected";}?>">Change Password</a></li>
+                                <li class="main_menu_item"><a href="/login/logout" class="main_menu_item">Logout</a></li>
+                            </ul>
+                        </div>
+<?php
+//print_r($_SESSION['Rights']);
+if (in_array("user", $_SESSION['Rights']) or
+    in_array("branch", $_SESSION['Rights']) or
+    in_array("role", $_SESSION['Rights']) or
+    in_array("employee", $_SESSION['Rights']) or
+    in_array("product", $_SESSION['Rights']) or
+    in_array("stock", $_SESSION['Rights'])
+) {
+?>
+                        <h3><a href="#" class="menu_header">Master</a></h3>
+                        <div style="padding-top:0">
+                            <ul class="main_menu">
+                            	<?php if (in_array("branch", $_SESSION['Rights'])) {?><li class="main_menu_item<?php if ($this->SelectedMenu == "Branch"){echo "_selected";}?>"><a href="/branch" class="main_menu_item">Branch</a></li><?php }?>
+                                <?php if (in_array("role", $_SESSION['Rights'])) {?><li class="main_menu_item<?php if ($this->SelectedMenu == "Role"){echo "_selected";}?>"><a href="/role" class="main_menu_item">Role</a></li><?php }?>
+                            	<?php if (in_array("employee", $_SESSION['Rights'])) {?><li class="main_menu_item<?php if ($this->SelectedMenu == "Employee"){echo "_selected";}?>"><a href="/employee" class="main_menu_item">Employee</a></li><?php }?>
+                            	<?php if (in_array("product", $_SESSION['Rights'])) {?><li class="main_menu_item<?php if ($this->SelectedMenu == "Product"){echo "_selected";}?>"><a href="/product" class="main_menu_item">Product</a></li><?php }?>
+                                <?php if (in_array("stock", $_SESSION['Rights'])) {?><li class="main_menu_item<?php if ($this->SelectedMenu == "Stock"){echo "_selected";}?>"><a href="/stock" class="main_menu_item">Stock</a></li><?php }?>
+                                <?php if (in_array("user", $_SESSION['Rights'])) {?><li class="main_menu_item<?php if ($this->SelectedMenu == "User"){echo "_selected";}?>"><a href="/user" class="main_menu_item">User</a></li><?php }?>
+                            </ul>
+                        </div>
+<?php
+}
+
+if (in_array("trnorder", $_SESSION['Rights']) or
+    in_array("trnorderassignment", $_SESSION['Rights']) or
+    in_array("trnfinishorder", $_SESSION['Rights']) or
+    in_array("trnservice", $_SESSION['Rights']) or
+    in_array("trnserviceassignment", $_SESSION['Rights']) or
+    in_array("trnfinishservice", $_SESSION['Rights']) or
+    in_array("trnpenggunaanbahan", $_SESSION['Rights']) or
+
+    in_array("trnsalesorder", $_SESSION['Rights']) or
+    in_array("trnpurchasesorder", $_SESSION['Rights']) or
+    in_array("trnkasharian", $_SESSION['Rights'])
+) {
+?>
+                        <h3><a href="#" class="menu_header">Transaction</a></h3>
+                        <div style="padding-top:0">
+                            <ul class="main_menu">
+                                <?php if (in_array("trnorder", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnorder" class="main_menu_item<?php if ($this->SelectedMenu == "Order"){echo "_selected";}?>">Order</a></li><?php }?>
+                                <?php if (in_array("trnorderassignment", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnorderassignment" class="main_menu_item<?php if ($this->SelectedMenu == "Trnorderassignment"){echo "_selected";}?>">Order Assignment</a></li><?php }?>
+                                <?php if (in_array("trnfinishorder", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnfinishorder" class="main_menu_item<?php if ($this->SelectedMenu == "Finishorder"){echo "_selected";}?>">Finish Order</a></li><?php }?>
+                                <?php if (in_array("trnservice", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnservice" class="main_menu_item<?php if ($this->SelectedMenu == "Service"){echo "_selected";}?>">Service</a></li><?php }?>
+                                <?php if (in_array("trnserviceassignment", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnserviceassignment" class="main_menu_item<?php if ($this->SelectedMenu == "Trnserviceassignment"){echo "_selected";}?>">Service Assignment</a></li><?php }?>
+                                <?php if (in_array("trnfinishservice", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnfinishservice" class="main_menu_item<?php if ($this->SelectedMenu == "Finishservice"){echo "_selected";}?>">Finish Service</a></li><?php }?>
+                                <?php if (in_array("trnpenggunaanbahan", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnpenggunaanbahan" class="main_menu_item<?php if ($this->SelectedMenu == "Penggunaanbahan"){echo "_selected";}?>">Penggunaan Bahan</a></li><?php }?>
+                                <?php if (in_array("trnsalesorder", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnsalesorder" class="main_menu_item<?php if ($this->SelectedMenu == "Salesorder"){echo "_selected";}?>">Sales Order</a></li><?php }?>
+                                <?php if (in_array("trnpurchasesorder", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnpurchasesorder" class="main_menu_item<?php if ($this->SelectedMenu == "Purchasesorder"){echo "_selected";}?>">Purchases Order</a></li><?php }?>
+                                <?php if (in_array("trnkasharian", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnkasharian" class="main_menu_item<?php if ($this->SelectedMenu == "Dailycash"){echo "_selected";}?>">Daily Cash</a></li><?php }?>
+                            </ul>
+                        </div>
+<?php
+}
+if (in_array("rptpembelanjaan", $_SESSION['Rights']) or
+        in_array("rptgaji", $_SESSION['Rights']) or
+        in_array("rptbiayaoperasional", $_SESSION['Rights']) or
+        in_array("rptpemasukan", $_SESSION['Rights']) or
+		in_array("rptrugilaba", $_SESSION['Rights']) or
+		in_array("rptstockopname", $_SESSION['Rights'])
+) {
+?>
+                        <h3><a href="#" class="menu_header">Reporting</a></h3>
+                        <div style="padding-top:0">
+                            <ul class="main_menu">
+                                <?php if (in_array("rptpembelanjaan", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/rptpembelanjaan" class="main_menu_item<?php if ($this->SelectedMenu == "Pembelanjaan"){echo "_selected";}?>">Pembelanjaan</a></li><?php }?>
+                                <?php if (in_array("rptgaji", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/rptgaji" class="main_menu_item<?php if ($this->SelectedMenu == "Gajipegawai"){echo "_selected";}?>">Gaji Pegawai</a></li><?php }?>
+                                <?php if (in_array("rptbiayaoperasional", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/rptbiayaoperasional" class="main_menu_item<?php if ($this->SelectedMenu == "Biaya Operasional"){echo "_selected";}?>">Biaya Operasional</a></li><?php }?>
+                                <?php if (in_array("rptpemasukan", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/rptpemasukan" class="main_menu_item<?php if ($this->SelectedMenu == "Pemasukan"){echo "_selected";}?>">Pemasukan</a></li><?php }?>
+                                <?php if (in_array("rptrugilaba", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/rptrugilaba" class="main_menu_item<?php if ($this->SelectedMenu == "Rugi Laba"){echo "_selected";}?>">Rugi laba</a></li><?php }?>
+                                <?php if (in_array("rptstockopname", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/rptstockopname" class="main_menu_item<?php if ($this->SelectedMenu == "Stockopname"){echo "_selected";}?>">Stock op name</a></li><?php }?>
+                                <?php if (in_array("rptharian", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/rptharian" class="main_menu_item<?php if ($this->SelectedMenu == "Harian"){echo "_selected";}?>">Harian</a></li><?php }?>
+                            </ul>
+                        </div>
+<?php
+}
+if (in_array("setting", $_SESSION['Rights']) or in_array("exportdata", $_SESSION['Rights'])) {
+?>
+                        <h3><a href="#" class="menu_header">Maintenance</a></h3>
+                        <div style="padding-top:0">
+                            <ul class="main_menu">
+                                <?php if (in_array("setting", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/mtnsetting" class="main_menu_item<?php if ($this->SelectedMenu == "Setting"){echo "_selected";}?>">Setting</a></li><?php }?>
+                                <?php if (in_array("exportdata", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/mtnexportdata" class="main_menu_item<?php if ($this->SelectedMenu == "Export Data"){echo "_selected";}?>">Export Data</a></li><?php }?>
+                            </ul>
+                        </div>
+<?php
+}
+?>
+                    </div>
+                </td>
+                <td height="100%" width="100%" id="pane_center"><?php echo $this->layout()->content; ?>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" id="pane_bottom">Logged in as <b><?php echo $_SESSION['Username']?></b> <?php if($_SESSION["BranchID"]) {echo "at <b>{$_SESSION["BranchName"]}</b>";}?></td>
+            </tr>
+        </table>
+    </body>
+    <script type="text/javascript">
+        $('#main_menu').accordion({autoHeight: false});
+        $(".button").button();
+
+        function activateAccordion(strAccordionID) {
+            if (strAccordionID) {
+                var intAccordionIndex = 0;
+
+                if (strAccordionID == "Master") {
+                    intAccordionIndex = 1;
+                }
+                else if (strAccordionID == "Transaction") {
+                    intAccordionIndex = 2;
+                }
+                else if (strAccordionID == "Reporting") {
+                    intAccordionIndex = 3;
+                }
+                else if (strAccordionID == "Maintenance") {
+                    intAccordionIndex = 4;
+                }
+
+                $('#main_menu').accordion("activate", intAccordionIndex);
+            }
+        }
+
+        activateAccordion("<?php echo $this->AccordionID;?>");
+
+    </script>
+</html>

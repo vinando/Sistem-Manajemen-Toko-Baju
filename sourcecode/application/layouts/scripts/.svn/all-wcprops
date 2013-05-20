@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/ACCQueueing/!svn/ver/134/trunk/application/layouts/scripts
+END
+layout.phtml
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/ACCQueueing/!svn/ver/133/trunk/application/layouts/scripts/layout.phtml
+END
+layout_external.phtml
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/ACCQueueing/!svn/ver/131/trunk/application/layouts/scripts/layout_external.phtml
+END
+layout_frontliners.phtml
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/ACCQueueing/!svn/ver/134/trunk/application/layouts/scripts/layout_frontliners.phtml
+END
+layout_login.phtml
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/ACCQueueing/!svn/ver/131/trunk/application/layouts/scripts/layout_login.phtml
+END

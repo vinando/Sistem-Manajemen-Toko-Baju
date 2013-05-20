@@ -1,0 +1,123 @@
+<div id="content_header"><h2>Master - Product</h2><div style="float:right"><h2 id="form_type"><?php echo $this->strFormType;?> Record</h2></div></div>
+<hr>
+
+<form id="form" method="POST" action="/product/save" class="form_element" enctype="multipart/form-data" target="form_iframe">
+
+    <table id="table_form">
+        <tr>
+            <td>Product ID</td>
+            <td><label for="ID"></label> <input type="text" name="ID" id="ID" size="20" readonly value="<?php echo $this->strID;?>" class="<?php if ($this->strFormType == "Edit") {echo "readonly ";}?>text"></td>
+        </tr>
+        <tr>
+            <td>Product Code * </td>
+            <td><label for="ProductCode"></label> <input type="text" name="ProductCode" id="ProductCode" size="20" size="10" value="<?php echo $this->ProductCode ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Product Name * </td>
+            <td><label for="ProductName"></label> <input type="text" name="ProductName" id="ProductName" size="20" value="<?php echo $this->ProductName ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Type * </td>
+            <td>
+                <label for="ProductType"></label>
+                <select name="ProductType" id="ProductType" class="required">
+                    <option value="">-- Pilih Product Type --</option>
+                    <option value="Finished Product" <?php if ($this->ProductType == "Finished Product") {echo "selected";}?> >Finished Product</option>
+                    <option value="Raw Material" <?php if ($this->ProductType == "Raw Material") {echo "selected";}?> >Raw Material</option>
+                    <option value="Accessories" <?php if ($this->ProductType == "Accessories") {echo "selected";}?>>Accessories</option>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Size</td>
+            <td>
+                <label for="Size"></label>
+                <select name="Size" id="Size">
+                    <option value="">-- Pilih Ukuran --</option>
+                    <?php
+                    foreach($this->Sizes as $idx => $Size) {
+                    ?>
+                    <option value="<?php echo $Size['name'];?>" <?php if ($this->Size == $Size['name']) {echo "selected";}?> ><?php echo $Size['name'];?></option>
+                    <?php
+                    }
+                    ?>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Color</td>
+            <td>
+                <label for="Color"></label>
+                <select name="Color" id="Color">
+                    <option value="">-- Pilih Warna --</option>
+                    <?php
+                    foreach($this->Colors as $idx => $Color) {
+                        ?>
+                        <option value="<?php echo $Color['name'];?>" <?php if ($this->Color == $Color['name']) {echo "selected";}?> ><?php echo $Color['name'];?></option>
+                        <?php
+                    }
+                    ?>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Material</td>
+            <td>
+                <label for="Material"></label>
+                <select name="Material" id="Material">
+                    <option value="">-- Pilih Bahan --</option>
+                    <?php
+                    foreach($this->Materials as $idx => $Material) {
+                        ?>
+                        <option value="<?php echo $Material['name'];?>" <?php if ($this->Material == $Material['name']) {echo "selected";}?> ><?php echo $Material['name'];?></option>
+                        <?php
+                    }
+                    ?>
+                </select>
+            </td>
+        </tr>
+    </table>
+
+<hr>
+<div id="form_save_result" class="form_save_success">Save successful</div>
+<input type="hidden" name="type" id="type" value="<?php echo $this->strFormType; ?>">
+<input type="submit" value="Save" id="btn_save" class="button">
+<input type="button" value="New" id="btn_new" class="button" onclick="window.location='/product/form/type/add'">
+<input type="button" value="Delete" id="btn_delete" class="button">
+<input type="button" value="Close" id="btn_close" onclick="window.location='/product'" class="button">
+</form>
+<iframe id="form_iframe" name="form_iframe" src="" style="width:100%;height:100px;border:0px solid #FFFFFF;"></iframe>
+
+<div id="dialog-modal" title="Attention" style="display:none"></div>
+
+<div id="dialog-confirm" title="Delete record?" style="display:none">
+	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This record will be permanently deleted and cannot be recovered. Are you sure?</p>
+</div>
+<script type="text/javascript">
+        $('#btn_delete').click(function() {
+        if ($('#type').val() == "Add") {
+            return;
+        }
+
+    	$( "#dialog-confirm" ).dialog({
+    		resizable: false,
+    		height:200,
+    		modal: true,
+    		buttons: {
+    			"Delete record": function() {
+    				$( this ).dialog("close");
+    				$.get("/product/save/type/Delete/ID/" + $('#ID').val(), function() {
+    				    window.location = '/employee';
+    				});
+    			},
+    			Cancel: function() {
+    				$( this ).dialog("close");
+    			}
+    		}
+    	});
+    });
+
+    var strProductID = $('#ID').val();
+
+    $("#form").validate();
+</script>

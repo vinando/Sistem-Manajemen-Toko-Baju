@@ -1,0 +1,113 @@
+<?php
+
+class TrafficmonitoringController extends Zend_Controller_Action {
+    private $model;
+    private $strUserID;
+    private $strUserBranchID;
+
+    public function init() {
+        $this->model = new Application_Model_Branch();
+        
+        $this->view->AccordionID  = "Reporting";
+        $this->view->SelectedMenu = "TrafficMonitoring";
+    }
+
+    public function preDispatch() {
+    	if (!Zend_Auth::getInstance()->hasIdentity()) {
+    	    $this->_helper->redirector('login', '');
+        }
+    }
+
+    public function indexAction(){
+        $strBranchID = $_SESSION['BranchID'];
+        $arrWaitingCustomers;
+        $arrCounters;
+        $arrCountersDT;
+        $intMaxCounterByTicketCategory = 0;
+
+        $modelBranchCounter = new Application_Model_Branchcounter();
+        $modelTicket = new Application_Model_Ticket();
+        $modelCounterSession = new Application_Model_Countersession();
+
+        // Display queueing by TicketCategory
+        $arrBranchTicketCategories = $modelBranchCounter->getAllTicketCategory($strBranchID);
+        $this->view->assign("TicketCategories", $arrBranchTicketCategories);
+
+        // Display waiting customers
+        foreach ($arrBranchTicketCategories as $i => $arrCategory) {
+            $intWaitingCustomers = $modelTicket->getTotalQueuing($arrCategory['TicketCategoryID'], $strBranchID);
+            if (!$intWaitingCustomers) $intWaitingCustomers = 0;
+            $arrWaitingCustomers[$arrCategory['TicketCategoryID']] = $intWaitingCustomers;
+
+            // Get counters based on ticket category
+            $arrCounters[$arrCategory['TicketCategoryID']] = $modelBranchCounter->getAllByBranchIDByTicketCategoryID($strBranchID, $arrCategory['TicketCategoryID']);
+            //var_dump($arrCounters);
+
+            foreach ($arrCounters[$arrCategory['TicketCategoryID']] as $arrCountersTmp) {
+                // Get logged Frontliners
+                $arrFrontliner = $modelCounterSession->getSingleByCounterNoByLoginTime($strBranchID, date("Y-m-d H:i:s"), $arrCountersTmp['CounterNo']);
+                $arrCountersDT[$arrCountersTmp['CounterNo']]["Frontliner"] = $arrFrontliner["FullName"];
+
+                // Get counter activity
+                $arrServerdCustomer = $modelTicket->getSingleByBranchIDByCounterNoByStatus($strBranchID, $arrCountersTmp['CounterNo'], "called");
+                if ($arrServerdCustomer) {
+                    $arrCountersDT[$arrCountersTmp['CounterNo']]["Served"] = "1";
+
+                    // Get served time
+                    $arrCountersDT[$arrCountersTmp['CounterNo']]["Time"] = IGLO_String::getTimeSubtracted(date("Y-m-d H:i:s"), $arrServerdCustomer["CalledDate"]);
+                } else {
+                    $arrCountersDT[$arrCountersTmp['CounterNo']]["Served"] = "0";
+
+                    if ($arrFrontliner["FullName"]) {
+                        // Get idle time
+                        $arrLastCustomer = $modelTicket->getLastSingleByBranchIDByCounterNo($strBranchID, $arrCountersTmp['CounterNo']);
+                        //var_dump($arrLastCustomer);
+                        if ($arrLastCustomer) {
+                            $arrCountersDT[$arrCountersTmp['CounterNo']]["Time"] = IGLO_String::getTimeSubtracted(date("Y-m-d H:i:s"), $arrLastCustomer["FinishDate"]);
+
+                            // Check if there is another customers in queue
+                            if ($modelTicket->getTotalQueuing($arrCategory['TicketCategoryID'], $strBranchID) > 0) {
+                                $arrCountersDT[$arrCountersTmp['CounterNo']]["Served"] = "<font color='red'>0</font>";
+                                $arrCountersDT[$arrCountersTmp['CounterNo']]["Time"]   = "<font color='red'>" . $arrCountersDT[$arrCountersTmp['CounterNo']]["Time"] . "</font>";
+                            }
+                        } else {
+                            $arrCountersDT[$arrCountersTmp['CounterNo']]["Served"] = "<font color='red'>0</font>";
+                            $arrCountersDT[$arrCountersTmp['CounterNo']]["Time"] = "<font color='red'>" . IGLO_String::getTimeSubtracted(date("Y-m-d H:i:s"), $arrFrontliner["LoginTime"]) . "</font>";
+                        }
+                    }
+                }
+            }
+
+            // Update maximum counter for a category
+            if ($intMaxCounterByTicketCategory < count($arrCounters[$arrCategory['TicketCategoryID']])) {
+                $intMaxCounterByTicketCategory = count($arrCounters[$arrCategory['TicketCategoryID']]);
+            }
+        }
+
+
+
+        //var_dump($arrCountersDT);
+        //echo $intMaxCounterByTicketCategory;exit;
+        $this->view->assign("WaitingCustomers", $arrWaitingCustomers);
+        $this->view->assign("Counters", $arrCounters);
+        $this->view->assign("CountersDT", $arrCountersDT);
+        $this->view->assign("MaxCounters", $intMaxCounterByTicketCategory);
+
+        // Displaying counter for checkin
+        /*$arrBranchCounters = $modelBranchCounter->getAllByBranchID($_SESSION['BranchID']);
+        if ($arrBranchCounters) {
+            $this->view->assign("Counters", $arrBranchCounters);
+
+            $arrFrontliners = array();
+            $model2 = new Application_Model_Countersession();
+            foreach ($arrBranchCounters as $arrBranchCounter) {
+                $arrFrontliner = $model2->getSingleByCounterNoByLoginTime($_SESSION['BranchID'], date("Y-m-d H:i:s"), $arrBranchCounter["CounterNo"]);
+                if ($arrFrontliner) {
+                    array_push($arrFrontliners, array($arrBranchCounter["CounterNo"] => $arrFrontliner["FullName"]));
+                }
+            }
+            $this->view->assign("Frontliners", $arrFrontliners);
+        }*/
+    }
+}
+

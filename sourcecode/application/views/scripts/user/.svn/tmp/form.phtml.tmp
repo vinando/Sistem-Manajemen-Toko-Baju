@@ -1,0 +1,211 @@
+<style>
+	#available_selectable .ui-selecting { background: #FECA40; }
+	#available_selectable .ui-selected { background: #F39814; color: white; }
+	#available_selectable { list-style-type: none; margin: 0; padding: 0; width: 100%; }
+	#available_selectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+
+	#assigned_selectable .ui-selecting { background: #FECA40; }
+	#assigned_selectable .ui-selected { background: #F39814; color: white; }
+	#assigned_selectable { list-style-type: none; margin: 0; padding: 0; width: 100%; }
+	#assigned_selectable li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+</style>
+<div id="content_header"><h2>Master - User</h2><div style="float:right"><h2 id="form_type"><?php echo $this->strFormType;?> Record</h2></div></div>
+<hr></hr>
+<div id="tabs">
+    <form id="form" method="POST" action="/user/save" class="form_element" enctype="multipart/form-data" target="form_iframe">
+
+    <ul>
+        <li><a href="#tabs-details">Details</a></li>
+        <li><a href="#tabs-rights">Access Rights</a></li>
+    </ul>
+
+    <div id="tabs-details">
+        <table id="table_form">
+            <tr>
+                <td>User ID *</td>
+                <td><input type="text" name="ID" id="ID" size="20" maxlength="20" value="<?php echo $this->strID;?>" class="<?php if($this->strFormType == "Edit") {echo "readonly ";} ?>text required" <?php if($this->strFormType == "Edit") {echo "readonly";} ?>></td>
+            </tr>
+            <tr>
+                <td>Full Name *</td>
+                <td><input type="text" name="FullName" id="FullName" size="50" maxlength="255" value="<?php echo $this->FullName; ?>" class="text required"></td>
+            </tr>
+            <tr>
+                <td>Email *</td>
+                <td><input type="text" name="Email" id="Email" size="50" maxlength="50" value="<?php echo $this->Email; ?>" class="text required"></td>
+            </tr>
+            <tr>
+                <td>Password</td>
+                <td><input type="password" name="Password" id="Password" size="20" maxlength="255" value="<?php echo $this->Password; ?>" class="text"></td>
+            </tr>
+            <tr>
+                <td>Confirm Password</td>
+                <td><input type="password" name="ConfirmPassword" id="ConfirmPassword" size="20" maxlength="255" value="<?php echo $this->ConfirmPassword; ?>" class="text"></td>
+            </tr>
+            <tr>
+                <td>Branch ID</td>
+                <td>
+                    <select name="BranchID" id="BranchID" class="dropdown">
+                        <option value="">--</option>
+                        <?php
+                        foreach ($this->Branches as $arrBranch) {
+                        ?>
+                        <option value="<?php echo $arrBranch["BranchID"];?>" <?php if ($this->BranchID == $arrBranch["BranchID"]) {echo "selected";}?>><?php echo $arrBranch["BranchName"]?></option>
+                        <?php
+                        }
+                        ?>
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div id="tabs-rights">
+        <table class="table_form">
+            <tr>
+                <td colspan="3"><h2>Master</h2></td>
+            </tr>
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="branch" <?php if(array_search("branch", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Branch</td>
+            </tr>    
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="ticketcategory" <?php if(array_search("ticketcategory", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Ticket Category</td>
+            </tr>  
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="branchcounter" <?php if(array_search("branchcounter", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Branch Counter</td>
+            </tr>                              
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="user" <?php if(array_search("user", $this->Rights) != false){echo "checked";}?>></td>
+                <td>User</td>
+            </tr>
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="branchfrontliners" <?php if(array_search("branchfrontliners", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Branch Frontliner</td>
+            </tr>
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="servicetype" <?php if(array_search("servicetype", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Service Type</td>
+            </tr>
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="mediaupload" <?php if(array_search("mediaupload", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Media</td>
+            </tr>                        
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="branchmedia" <?php if(array_search("branchmedia", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Branch Media</td>
+            </tr>
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="standardproductivity" <?php if(array_search("standardproductivity", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Standard Productivity</td>
+            </tr>
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="news" <?php if(array_search("news", $this->Rights) != false){echo "checked";}?>></td>
+                <td>News</td>
+            </tr>            
+            <tr>
+                <td colspan="3"><h2>Dashboard</h2></td>
+            </tr>
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="frontliners" <?php if(array_search("frontliners", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Frontliners</td>
+            </tr>
+            <tr>
+                <td colspan="3"><h2>Reporting</h2></td>
+            </tr>
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="trafficmonitoring" <?php if(array_search("trafficmonitoring", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Traffic Monitoring</td>
+            </tr>
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="waitingtime" <?php if(array_search("waitingtime", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Waiting Time</td>
+            </tr>
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="walkinpattern" <?php if(array_search("walkinpattern", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Walkin Pattern</td>
+            </tr>
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="productivity" <?php if(array_search("productivity", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Productivity</td>
+            </tr>
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="efficiency" <?php if(array_search("efficiency", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Efficiency</td>
+            </tr>  
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="walkinrelation" <?php if(array_search("walkinrelation", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Walkin Relation</td>
+            </tr>          
+            <tr>
+                <td colspan="3"><h2>Maintenance</h2></td>
+            </tr>
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="exportdata" <?php if(array_search("exportdata", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Export Data</td>
+            </tr>
+            <tr>
+                <td> &nbsp; </td>
+                <td><input type="checkbox" name="Rights[]" id="Rights[]" value="setting" <?php if(array_search("setting", $this->Rights) != false){echo "checked";}?>></td>
+                <td>Setting</td>
+            </tr>
+        </table>
+    </div>
+    <hr>
+    <div id="form_save_result" class="form_save_success">Save successful</div>
+    <input type="hidden" name="type" id="type" value="<?php echo $this->strFormType; ?>">
+    <input type="submit" value="Save" id="btn_save" class="button">
+    <input type="button" value="New" id="btn_new" class="button" onclick="window.location='/user/form/type/add'">
+    <input type="button" value="Delete" id="btn_delete" class="button">
+    <input type="button" value="Close" id="btn_close" onclick="window.location='/user'" class="button">    
+    </form>
+    <iframe id="form_iframe" name="form_iframe" src="" style="width:200;height:200;border:0px solid #FFFFFF;"></iframe>
+</div>
+<div id="dialog-confirm" title="Delete record?" style="display:none">
+	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This record will be permanently deleted and cannot be recovered. Are you sure?</p>
+</div>
+<script>
+$('#btn_delete').click(function() {
+    if ($('#type').val() == "Add") {
+        return;
+    }
+
+	$( "#dialog-confirm" ).dialog({
+		resizable: false,
+		height:200,
+		modal: true,
+		buttons: {
+			"Delete record": function() {
+				$( this ).dialog("close");
+				$.get("/user/save/type/Delete/ID/" + $('#ID').val(), function() {
+				    window.location = '/user';
+				});
+			},
+			Cancel: function() {
+				$( this ).dialog("close");
+			}
+		}
+	});
+});
+
+$( "#tabs" ).tabs();
+$("#form").validate();
+</script>

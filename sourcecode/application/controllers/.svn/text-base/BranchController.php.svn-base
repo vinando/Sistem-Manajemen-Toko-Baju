@@ -1,0 +1,159 @@
+<?php
+
+class BranchController extends Zend_Controller_Action {
+    private $model;
+
+    public function init() {
+        $this->model = new Application_Model_Branch();
+        $this->view->AccordionID  = "Master";
+        $this->view->SelectedMenu = "Branch";
+    }
+
+    public function preDispatch() {
+    	if (!Zend_Auth::getInstance()->hasIdentity()) {
+    	    $this->_helper->redirector('login', '');
+        }
+    }
+
+    public function indexAction(){
+    }
+
+    public function dataAction() {
+        $strBranchID = $this->getRequest()->getParam("branch");
+        switch ($this->getRequest()->getParam("type")) {
+            case "counter":
+                $modelBranchCounter = new Application_Model_Branchcounter();
+                echo json_encode($modelBranchCounter->getDataTable($strBranchID));
+                break;
+
+            case "frontliners":
+                $modelBranchFrontliners = new Application_Model_Branchfrontliners();
+                echo json_encode($modelBranchFrontliners->getDataTable($strBranchID));
+                break;
+
+            case "":
+                echo json_encode($this->model->getDataTable());
+                break;
+        }
+    	exit;
+    }
+
+    public function formAction(){
+        switch ($this->getRequest()->getParam("type")) {
+            case "add";
+                $this->view->assign("strFormType", "Add");
+                $this->view->assign("strID", "Automatic");
+                break;
+
+            case "edit":
+                $this->view->assign("strFormType", "Edit");
+                $this->view->assign("strID", $this->getRequest()->getParam("id"));
+
+                $arrData = $this->model->getSingle($this->getRequest()->getParam("id"));
+
+                // Set record data to form
+                $this->view->assign("BranchCode", $arrData['BranchCode']);
+                $this->view->assign("BranchName", $arrData['BranchName']);
+                $this->view->assign("BranchTimeZone", $arrData['BranchTimeZone']);
+                $this->view->assign("FTPAddress", $arrData['FTPAddress']);
+                $this->view->assign("FTPUserName", $arrData['FTPUserName']);
+                $this->view->assign("FTPPassword", $arrData['FTPPassword']);
+                break;
+        }
+    }
+
+    public function saveAction() {
+    	$strBranchCode = $this->getRequest()->getParam("BranchCode");
+
+        switch ($this->getRequest()->getParam("type")) {
+            case "Add":
+                // Check empty fields
+                if (!$strBranchCode or !$this->getRequest()->getParam("BranchName")) {
+                    echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                    exit;
+                }
+
+                // Check Invalid characters
+                if (preg_match("/[^\s\d\w]+/", $this->getRequest()->getParam("BranchName"))) {
+                    echo "<script>window.parent.saveFailed('Please use only alphanumeric on Branch Name!')</script>";
+                    break;
+                }
+
+                $id = $this->model->insert($strBranchCode,
+                		addslashes($this->getRequest()->getParam("BranchName")),
+                		addslashes($this->getRequest()->getParam("BranchTimeZone")),
+                        addslashes($this->getRequest()->getParam("FTPAddress")),
+                        addslashes($this->getRequest()->getParam("FTPUserName")),
+                        addslashes($this->getRequest()->getParam("FTPPassword")));
+                if ($id) {
+                    echo "<script>window.parent.saveSuccess('ID', $id);</script>";
+                } else {
+                    echo "<script>window.parent.saveFailed('Save failed')</script>";
+                }
+                break;
+
+            case "Edit":
+                // Check empty fields
+                if (!$strBranchCode or !$this->getRequest()->getParam("BranchName") or !$this->getRequest()->getParam("BranchTimeZone")) {
+                    echo "<script>window.parent.saveFailed('Please input all required field first!')</script>";
+                    exit;
+                }
+
+                // Check Invalid characters
+                if (preg_match("/[^\s\d\w]+/", $this->getRequest()->getParam("BranchName"))) {
+                    echo "<script>window.parent.saveFailed('Please use only alphanumeric on Branch Name!')</script>";
+                    break;
+                }
+
+                $this->model->update(addslashes($this->getRequest()->getParam("ID")),
+                		addslashes($strBranchCode),
+                        addslashes($this->getRequest()->getParam("BranchName")),
+                        addslashes($this->getRequest()->getParam("BranchTimeZone")),
+                        addslashes($this->getRequest()->getParam("FTPAddress")),
+                        addslashes($this->getRequest()->getParam("FTPUserName")),
+                        addslashes($this->getRequest()->getParam("FTPPassword")));
+                echo "<script>window.parent.editSuccess()</script>";
+                break;
+
+            case "Delete":
+            	$strBranchID = addslashes($this->getRequest()->getParam("ID"));
+
+            	$arrBranch = $this->model->getSingle($strBranchID);
+
+            	// Delete constrain
+            	// * Delete Branch Frontliners
+            	$model = new Application_Model_Branchfrontliners();
+            	$model->deleteAllByBranchID($strBranchID);
+
+            	// * Delete Branch Counters
+            	$model = new Application_Model_Branchcounter();
+            	$model->deleteAllByBranchID($strBranchID);
+
+            	// Delete  Branch Media
+            	$model = new Application_Model_Branchmedia();
+            	$modelMedia = new Application_Model_Media();
+            	// Delete files on remote FTP
+            	$arrBranchMediaList = $model->getAllVideoByBranchID($strBranchID);
+            	if (count($arrBranchMediaList) > 0) {
+            		$connFtp = ftp_connect($arrBranch['FTPAddress']);
+            		ftp_login($connFtp, $arrBranch['FTPUserName'], $arrBranch['FTPPassword']);
+            		foreach ($arrBranchMediaList as $arrBranchMedia) {
+            			$arrMedia = $modelMedia->getSingle($arrBranchMedia["MediaID"]);
+            			!ftp_delete($connFtp, $arrMedia["Content"]);
+            		}
+            		ftp_close($connFtp);
+            	}
+
+            	$model->deleteAllByBranchID($strBranchID);
+
+            	// Delete Branch Standard Productivity
+            	$model = new Application_Model_Standardproductivity();
+            	$model->deleteAllByBranchID($strBranchID);
+
+                $this->model->delete($strBranchID);
+                break;
+        }
+        exit;
+    }
+}
+

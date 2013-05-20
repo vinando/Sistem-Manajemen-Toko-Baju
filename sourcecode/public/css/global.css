@@ -1,0 +1,153 @@
+html, body{
+	margin: 0px auto;
+}
+html, body {
+	background-image: url(../images/background.jpg);
+	background-repeat: repeat-x;
+	background-size:auto;
+	width: 100%;
+	height: 100%;
+	padding: 0;
+	margin: 0 ;
+}
+
+.thitam {font:12px Trebuchet MS, Tahoma, Geneva, sans-serif; color:#000; }
+.thitam a {font:12px Helvetica, Tahoma, Geneva, sans-serif; color: #ffffff; text-decoration:none; }
+.thitam a:hover {font:12px Helvetica, Tahoma, Geneva, sans-serif; color: #f37226; }
+
+
+/* CSS Document data - grid*/
+.data_grid{
+	font-size:13px;
+}
+.data_grid td{
+	padding:5px;
+}
+.data_grid #th{
+	background-color:#FC3;
+	font-weight:bold;
+}
+.data_grid #odd{
+	background-color:#AAA;
+}
+
+.data_grid #even{
+	background-color:#BBB;
+}
+
+
+/* CSS Document for Zend - Form*/
+dl.zend_form{ font-size:13px; background-color:#FC3;}
+
+dl.zend_form dt {
+	min-width: 200px;
+	float: left;
+	clear: left;
+	padding-right:15px;
+	padding-top:9px;
+	padding-bottom:4px;
+	text-align: right;
+	background-color:#BBB;
+}
+dl.zend_form dt label.required { font-weight: 600; }
+
+dl.zend_form dd {
+	/*float: left;
+	clear: right;*/
+	padding-top:4px;
+	padding-bottom:0px;
+	padding-left: 35px;
+	background-color:#e6e3e3;
+}
+dl.zend_form dd ul.errors {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+}
+dl.zend_form #mode-element{display : none}
+dl.zend_form #id-element{display : none}
+dl.zend_form dd ul.errors li {
+	float: left;
+	margin: 0 0.15em;
+	font-size: 12px;
+	color: #666666;
+}
+
+/************************************************************************************/
+/******************************** LAY OUT LAY OUT LAY OUT LAY OUT LAY OUT *************************************/
+/************************************************************************************/
+/* CSS Document for jquery layout*/
+.ui-layout-pane { /* all 'panes' */
+	padding: 10px;
+	/*background: #FFF;*/
+	
+	border-top: 1px solid #BBB;
+	border-bottom: 1px solid #BBB;
+}
+.ui-layout-north {
+    border: 1px solid #BBB;
+    margin: 0px;
+    padding: 0px;
+    background-image: url(images/background.jpg);
+    /*background-image: url(../images/bgHeader.jpg);
+    background-repeat: repeat-x;*/
+    
+}
+.ui-layout-pane-south {
+	border: 1px solid #BBB;
+}
+.ui-layout-pane-west {
+	border-left: 1px solid #BBB;
+}
+.ui-layout-pane-east {
+	border-right: 1px solid #BBB;
+}
+.ui-layout-pane-center {
+	border-left: 0;
+	border-right: 0;
+}
+.inner-center {
+	border: 1px solid #BBB;
+}
+.outer-west ,
+.outer-east {
+	/*background-color: #EEE;*/
+}
+.middle-west ,
+.middle-east {
+	/*background-color: #F8F8F8;*/
+}
+.ui-layout-resizer { /* all 'resizer-bars' */
+	/*background: #DDD;*/
+}
+.ui-layout-resizer:hover { /* all 'resizer-bars' */
+	/*background: #FED;*/
+}
+.ui-layout-resizer-west {
+	border-left: 1px solid #BBB;
+}
+.ui-layout-resizer-east {
+	border-right: 1px solid #BBB;
+}
+.ui-layout-toggler { /* all 'toggler-buttons' */
+	background: #AAA;
+}
+.ui-layout-toggler:hover { /* all 'toggler-buttons' */
+	background: #FC3;
+}
+.outer-center ,
+.middle-center {
+/* center pane that are 'containers' for a nested layout */
+padding: 0;
+border: 0;
+}
+.inner-center {
+    overflow-y: scroll;
+}
+.inner-center a{
+    color:#000099;
+    text-decoration:none;
+}
+/************************************************************************************/
+/************************************************************************************/
+/************************************************************************************/

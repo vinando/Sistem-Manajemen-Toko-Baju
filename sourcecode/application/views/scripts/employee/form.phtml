@@ -1,0 +1,103 @@
+<div id="content_header"><h2>Master - Employee</h2><div style="float:right"><h2 id="form_type"><?php echo $this->strFormType;?> Record</h2></div></div>
+<hr>
+
+<form id="form" method="POST" action="/employee/save" class="form_element" enctype="multipart/form-data" target="form_iframe">
+
+    <table id="table_form">
+        <tr>
+            <td>Employee ID</td>
+            <td><input type="text" name="ID" id="ID" size="20" readonly value="<?php echo $this->strID;?>" class="<?php if ($this->strFormType == "Edit") {echo "readonly ";}?>text"></td>
+        </tr>
+        <tr>
+            <td>Branch ID</td>
+            <td><label for="BranchID"></label>
+                <select name="BranchID" id="BranchID" class="dropdown required">
+                    <option value="">--</option>
+                    <?php
+                    foreach ($this->Branches as $arrBranch) {
+                        ?>
+                        <option value="<?php echo $arrBranch["id"];?>" <?php if ($this->BranchID == $arrBranch["id"]) {echo "selected";}?>><?php echo $arrBranch["code"].' | '.$arrBranch["name"]?></option>
+                        <?php
+                    }
+                    ?>
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td>Employee Code * </td>
+            <td><label for="EmployeeCode"></label> <input type="text" name="EmployeeCode" id="EmployeeCode" size="20" size="10" value="<?php echo $this->EmployeeCode ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Employee Name * </td>
+            <td><label for="EmployeeName"></label> <input type="text" name="EmployeeName" id="EmployeeName" size="20" value="<?php echo $this->EmployeeName ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Date of Birth * </td>
+            <td><label for="DOB"></label> <input type="text" name="DOB" id="DOB" size="20" value="<?php echo $this->DOB ?>" class="text required"></td>
+        </tr>
+        <tr>
+            <td>Gender * </td>
+            <td>
+                <input type="radio" name="Gender" id="GenderMale" value="Laki-laki" checked >Laki-laki &nbsp;
+                <input type="radio" name="Gender" id="GenderFemale" value="Laki-laki" <?php if($this->Gender == 'Perempuan') echo 'checked' ?> >Perempuan
+            </td>
+        </tr>
+        <tr>
+            <td>Salary * </td>
+            <td><input type="text" name="Salary" id="Salary" size="20" value="<?php echo $this->Salary ?>" class="text required"></td>
+        </tr>
+    </table>
+
+<hr>
+<div id="form_save_result" class="form_save_success">Save successful</div>
+<input type="hidden" name="type" id="type" value="<?php echo $this->strFormType; ?>">
+<input type="submit" value="Save" id="btn_save" class="button">
+<input type="button" value="New" id="btn_new" class="button" onclick="window.location='/employee/form/type/add'">
+<input type="button" value="Delete" id="btn_delete" class="button">
+<input type="button" value="Close" id="btn_close" onclick="window.location='/employee'" class="button">
+</form>
+<iframe id="form_iframe" name="form_iframe" src="" style="width:100%;height:100px;border:0px solid #FFFFFF;"></iframe>
+
+<div id="dialog-modal" title="Attention" style="display:none"></div>
+
+<div id="dialog-confirm" title="Delete record?" style="display:none">
+	<p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This record will be permanently deleted and cannot be recovered. Are you sure?</p>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $( "#DOB" ).datepicker({
+            showOn: "button",
+            buttonImage: "/images/icons/calendar.gif",
+            buttonImageOnly: true,
+            dateFormat: "dd-mm-yy",
+            changeMonth: true,
+            changeYear: true
+        });
+    });
+        $('#btn_delete').click(function() {
+        if ($('#type').val() == "Add") {
+            return;
+        }
+
+    	$( "#dialog-confirm" ).dialog({
+    		resizable: false,
+    		height:200,
+    		modal: true,
+    		buttons: {
+    			"Delete record": function() {
+    				$( this ).dialog("close");
+    				$.get("/employee/save/type/Delete/ID/" + $('#ID').val(), function() {
+    				    window.location = '/employee';
+    				});
+    			},
+    			Cancel: function() {
+    				$( this ).dialog("close");
+    			}
+    		}
+    	});
+    });
+
+    var strEmployeeID = $('#ID').val();
+
+    $("#form").validate();
+</script>

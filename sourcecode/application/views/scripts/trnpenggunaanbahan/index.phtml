@@ -1,0 +1,42 @@
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#main_menu').accordion({autoHeight: false});
+        $('#table_list').dataTable({
+            "bJQueryUI": true,
+            "bServerSide": true,
+            "sServerMethod": "POST",
+            "sPaginationType": "full_numbers",
+            "sAjaxSource": "/trnpenggunaanbahan/data"
+        });
+
+        $('#table_list tbody tr').live('dblclick', function () {
+                var sTitle;
+                var nTds = $('td', this);
+                var strID = $(nTds[0]).text();
+
+                window.location='/trnpenggunaanbahan/form/type/edit/id/' + strID;
+        });
+    });
+</script>
+
+<form class="form_element" action="">
+<div id="content_header"><h2>Transaction - Using of Raw Material</h2></div>
+<div style="float:right;padding-bottom:5px">
+    <input type="button" value="Create New Record" onclick="window.location='/trnpenggunaanbahan/form/type/add'" class="button">
+</div>
+<hr>
+
+<table id="table_list">
+    <thead>
+        <tr>
+            <td>Trn. ID</td>
+            <td>Branch ID</td>
+            <td>Trn. No.</td>
+            <td>Order No</td>
+            <td>Trn. Date</td>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+</form>

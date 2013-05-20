@@ -1,0 +1,55 @@
+<div id="content_header"><h2>Reporting - Stock Detail</h2></div>
+<hr>
+<br/>
+<table>
+    <tr>
+        <td>Cabang</td><td>: <?php echo $this->data['Branch']['name'];?></td>
+    </tr>
+    <tr>
+        <td>Product Code</td><td>: <?php echo $this->data['Product']['code'];?></td>
+    </tr>
+    <tr>
+        <td>Product Name</td><td>: <?php echo $this->data['Product']['name'];?></td>
+    </tr>
+    <tr>
+        <td>Size</td><td>: <?php echo $this->data['Product']['size'];?></td>
+    </tr>
+    <tr>
+        <td>Color</td><td>: <?php echo $this->data['Product']['color'];?></td>
+    </tr>
+    <tr>
+        <td>Material</td><td>: <?php echo $this->data['Product']['material'];?></td>
+    </tr>
+</table>
+<table id="table_list" width="30%" cellspacing="1" cellpadding="5">
+<thead>
+    <tr bgcolor="#d6d6d6">
+        <td align="center">No. Seri</td>
+        <td align="center">Stock</td>
+    </tr>
+</thead>
+<tbody>
+<?php
+$grandTotal = 0;
+if(count($this->data['Detail']) > 0){
+    $i = 0;
+    foreach($this->data['Detail'] as $idx => $item ) {
+        $i++;
+        $grandTotal += $item['stock'];
+        if($i%2 == 0) $bgcolor = "#e6e6fa";
+        else $bgcolor = "#f1f0f0";
+    ?>
+    <tr bgcolor="<?php echo $bgcolor; ?>">
+        <td><?php echo $item['noseri']; ?></td>
+        <td align="right"><?php echo $item['stock']; ?></td>
+    </tr>
+    <?php
+    }
+}
+?>
+</tbody>
+    <tr>
+        <td align="right">Total :</td>
+        <td align="right" style="color: red;"><?php echo $grandTotal; ?></td>
+    </tr>
+</table>

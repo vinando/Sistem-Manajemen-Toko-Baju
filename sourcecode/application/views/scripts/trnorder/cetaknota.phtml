@@ -1,0 +1,82 @@
+<div id="nota-penjualan">
+    <span style="font-size: 20px;font-weight: bold;">TOKO JAKET KULIT KALONG</span>
+    <table width="100%">
+        <tr>
+            <td width="70%" valign="top">
+                Work Shop : Jl. Raya Kd. Halang, No. 189 - Bogor <br/>
+                Telp. (0251) 8659807. <br/>
+                HP. 0813 1639 8419 <br/>
+                Pin BB : 256918CD
+            </td>
+            <td valign="top" nowrap="">
+                Kepada Yth. <br/>
+                Nama : <?php echo $this->CustomerName;?> <br/>
+                Telp : <?php echo $this->Phone;?> <br/><br/>
+            </td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td style="font-size: 20px;font-weight: bold;">Nota Pesanan</td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td style="font-size: 16px;font-weight: bold;">No: <?php echo $this->OrderNo;?></td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td>Tanggal: <?php echo date('d-m-Y');?></td>
+        </tr>
+    </table>
+    <br/>
+    <table width="100%">
+        <tr bgcolor="#e6e6fa">
+            <td width="100">Kode Barang</td>
+            <td width="250">Nama Barang</td>
+            <td>Ukuran</td>
+            <td>Warna</td>
+            <td>Bahan</td>
+        </tr>
+        <tr>
+            <td>JK-DI-001-001</td>
+            <td>Jaket Kulit Domba Import</td>
+            <td>XL</td>
+            <td>Biru Tua</td>
+            <td>Kulit Domba Import Turki</td>
+        </tr>
+    </table>
+    <br/><br/><br/><br/>
+    <b>Ukuran sbb:</b>
+    <br/><br/>
+    1. Jaket
+    <table>
+        <tr><td>- Bahu/Shoulder</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- P. Lengan/Sleeve Length</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- Lingkar Dada/Chest</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- Pinggang/Waist</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- Pinggul/Hip</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- P. Badan/Length</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- Manset/Cuff</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- Kerong Lengan/A.H.</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- Kerong Leher/N.H.</td><td>&nbsp;&nbsp;:</td></tr>
+    </table>
+    <br/>
+    2. Celana/Rok
+    <table>
+        <tr><td>- Bahu/Shoulder</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- P. Lengan/Sleeve Length</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- Lingkar Dada/Chest</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- Pinggang/Waist</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- Pinggul/Hip</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- P. Badan/Length</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- Manset/Cuff</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- Kerong Lengan/A.H.</td><td>&nbsp;&nbsp;:</td></tr>
+        <tr><td>- Kerong Leher/N.H.</td><td>&nbsp;&nbsp;:</td></tr>
+    </table>
+</div>
+<br/><br/><br/>
+<a href="#" id="btnCetak">Cetak</a> | <a href="/trnorder">Cancel</a>
+<script type="text/javascript">
+    $('#btnCetak').click(function(){
+        $('#nota-penjualan').printElement();
+    });
+</script>

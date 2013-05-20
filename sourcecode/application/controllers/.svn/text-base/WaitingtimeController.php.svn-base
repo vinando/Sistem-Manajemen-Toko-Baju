@@ -1,0 +1,192 @@
+<?php
+
+class WaitingtimeController extends Zend_Controller_Action
+{
+	private $model;
+	private $model_report;
+	private $model_branchcounter;
+	
+    public function init()
+    {
+        /* Initialize action controller here */
+        $this->model = new Application_Model_Branch();
+        $this->model_report = new Application_Model_Report();
+        $this->model_branchcounter = new Application_Model_Branchcounter();
+        
+        $this->view->AccordionID  = "Reporting";
+        $this->view->SelectedMenu = "WaitingTime";
+    }
+	public function preDispatch() {
+    	if (!Zend_Auth::getInstance()->hasIdentity()) {
+    	    $this->_helper->redirector('login', '');
+        }
+    }
+    public function indexAction()
+    {
+        // action body
+        if($_SESSION['BranchID'] == '') $this->view->branchs = $this->model->getAll();
+        else $this->view->branchs = $this->model->getSingleBranch($_SESSION['BranchID']);
+        
+    }
+	public function viewresultAction()
+    {
+        // action body
+        $data = $this->getDataWaitingTime();
+        $this->view->startdate = $this->getRequest()->getParam('startdate');
+        $this->view->enddate = $this->getRequest()->getParam('enddate');
+        $this->view->data = $data;
+    }
+    public function jasondataAction()
+    {
+        // action body
+        $data = $this->getDataWaitingTime();
+        echo json_encode($data);
+        exit;
+    }
+    public function getDataWaitingTime(){
+    	$branchids = $this->getRequest()->getParam('branchids');
+        $branchids = explode(',', $branchids);
+        $startdate = $this->getRequest()->getParam('startdate');
+        $enddate = $this->getRequest()->getParam('enddate');
+        $data = array();
+        if(count($branchids) > 0){
+        	foreach ($branchids as $idx => $branchid){
+	        	$branch = $this->model_report->getSingleBranch($branchid);
+	        	$data[$idx]['branch'] = $branch;
+	        	//$ticketcategories = $this->model_report->getTicketCategories($branchid);
+	        	$ticketcategories = $this->model_branchcounter->getAllTicketCategory($branchid);
+	        	
+	        	$total_0_5 = 0;
+	        	$persen_0_5 = 0;
+	        	$persen_cumulative_0_5 = 0;
+	        	$total_5_10 = 0;
+	        	$persen_5_10 = 0;
+	        	$persen_cumulative_5_10 = 0;
+	        	$total_10_15 = 0;
+	        	$persen_10_15 = 0;
+	        	$persen_cumulative_10_15 = 0;
+	        	$total_15_20 = 0;
+	        	$persen_15_20 = 0;
+	        	$persen_cumulative_15_20 = 0;
+	        	$total_20_25 = 0;
+	        	$persen_20_25 = 0;
+	        	$persen_cumulative_20_25 = 0;
+	        	$total_25_30 = 0;
+	        	$persen_25_30 = 0;
+	        	$persen_cumulative_25_30 = 0;
+	        	$total_30_ = 0;
+	        	$persen_30_ = 0;
+	        	$persen_cumulative_30_ = 0;
+	        	$total_below_service_level = 0;
+	        	$grandtotal = 0;
+	        	$persen_total = 0;
+	        	foreach ($ticketcategories as $idx1 => $ticketkategory){
+	        		$data[$idx]['data'][$idx1]['ticketcategory'] = $ticketkategory;
+	        		$ServiceLevel = ceil($ticketkategory['ServiceLevel'] * 60); // get Service level in seconds 
+	        		
+	        		$waitingtime_0_5 = $this->model_report->getWaitingTime($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate), '00:00:00', '00:05:00');
+	        		$waitingtime_5_10 = $this->model_report->getWaitingTime($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate), '00:05:00', '00:10:00');
+	        		$waitingtime_10_15 = $this->model_report->getWaitingTime($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate), '00:10:00', '00:15:00');
+	        		$waitingtime_15_20 = $this->model_report->getWaitingTime($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate), '00:15:00', '00:20:00');
+	        		$waitingtime_20_25 = $this->model_report->getWaitingTime($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate), '00:20:00', '00:25:00');
+	        		$waitingtime_25_30 = $this->model_report->getWaitingTime($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate), '00:25:00', '00:30:00');
+	        		$waitingtime_30_ = $this->model_report->getWaitingTime($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate), '00:30:00', '23:59:59');
+	        		$data[$idx]['data'][$idx1]['waitingtime_0_5'] = $waitingtime_0_5;
+	        		$data[$idx]['data'][$idx1]['waitingtime_5_10'] = $waitingtime_5_10;
+	        		$data[$idx]['data'][$idx1]['waitingtime_10_15'] = $waitingtime_10_15;
+	        		$data[$idx]['data'][$idx1]['waitingtime_15_20'] = $waitingtime_15_20;
+	        		$data[$idx]['data'][$idx1]['waitingtime_20_25'] = $waitingtime_20_25;
+	        		$data[$idx]['data'][$idx1]['waitingtime_25_30'] = $waitingtime_25_30;
+	        		$data[$idx]['data'][$idx1]['waitingtime_30_'] = $waitingtime_30_;
+	        		
+	        		$below_service_level = $this->model_report->getWaitingTime($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate), '00:00:00', $this->model_report->sec_to_time($ServiceLevel));
+	        		$data[$idx]['data'][$idx1]['below_service_level'] = $below_service_level;
+					$total_per_category = count($waitingtime_0_5) + count($waitingtime_5_10) + count($waitingtime_10_15) + count($waitingtime_15_20) + count($waitingtime_20_25) + count($waitingtime_25_30) + count($waitingtime_30_);
+	        		$data[$idx]['data'][$idx1]['total_per_category'] = $total_per_category;
+	        		if ($total_per_category == 0) $persen_per_category = 0;
+	        		else $persen_per_category = round( (count($below_service_level) / $total_per_category) * 100, 2 );
+	        		$data[$idx]['data'][$idx1]['persen_per_category'] = $persen_per_category;
+	        		
+	        		$total_0_5 += count($waitingtime_0_5);
+                    $total_5_10 += count($waitingtime_5_10);
+	        		$total_10_15 += count($waitingtime_10_15);
+	        		$total_15_20 += count($waitingtime_15_20);
+	        		$total_20_25 += count($waitingtime_20_25);
+	        		$total_25_30 += count($waitingtime_25_30);
+	        		$total_30_ += count($waitingtime_30_);
+	        		$total_below_service_level += count($below_service_level);
+	        		$grandtotal += $total_per_category;
+	        	}    
+	        	if($grandtotal != 0){
+					$persen_0_5 = ceil( ($total_0_5/$grandtotal) * 100 );
+		        	$persen_cumulative_0_5 = $persen_0_5;
+		        	$persen_5_10 = ceil( ($total_5_10/$grandtotal) * 100 );
+		        	$persen_cumulative_5_10 = ceil( ( ($total_0_5 + $total_5_10)/$grandtotal) * 100 );
+		        	$persen_10_15 = ceil( ($total_10_15/$grandtotal) * 100 );
+					$persen_cumulative_10_15 = ceil( ( ($total_0_5 + $total_5_10 + $total_10_15)/$grandtotal) * 100 );
+		        	$persen_15_20 = ceil( ($total_15_20/$grandtotal) * 100 );
+		        	$persen_cumulative_15_20 = ceil( ( ($total_0_5 + $total_5_10 + $total_10_15 + $total_15_20)/$grandtotal) * 100 );
+		        	$persen_20_25 = ceil( ($total_20_25/$grandtotal) * 100 );
+		        	$persen_cumulative_20_25 = ceil( ( ($total_0_5 + $total_5_10 + $total_10_15 + $total_15_20 + $total_20_25)/$grandtotal) * 100 );
+		        	$persen_25_30 = ceil( ($total_25_30/$grandtotal) * 100 );
+		        	$persen_cumulative_25_30 = ceil( ( ($total_0_5 + $total_5_10 + $total_10_15 + $total_15_20 + $total_20_25 + $total_25_30)/$grandtotal) * 100 );
+		        	$persen_30_ = ceil( ($total_30_/$grandtotal) * 100 );
+		        	$persen_cumulative_30_ = ceil( ( ($total_0_5 + $total_5_10 + $total_10_15 + $total_15_20 + $total_20_25 + $total_25_30 + $total_30_)/$grandtotal) * 100 );
+                    $persen_total = ceil($total_below_service_level/$grandtotal * 100) ;
+	        	}
+	        	else {
+	        		$persen_0_5 = 0;
+		        	$persen_cumulative_0_5 = $persen_0_5;
+		        	$persen_5_10 = 0;
+		        	$persen_cumulative_5_10 = 0;
+		        	$persen_10_15 = 0;
+					$persen_cumulative_10_15 = 0;
+		        	$persen_15_20 = 0;
+		        	$persen_cumulative_15_20 = 0;
+		        	$persen_20_25 = 0;
+		        	$persen_cumulative_20_25 = 0;
+		        	$persen_25_30 = 0;
+		        	$persen_cumulative_25_30 = 0;
+		        	$persen_30_ = 0;
+		        	$persen_cumulative_30_ = 0;        		
+	        	}
+	        	
+	        	$data[$idx]['total_0_5'] = $total_0_5;
+	        	$data[$idx]['total_5_10'] = $total_5_10;
+	        	$data[$idx]['total_10_15'] = $total_10_15;
+	        	$data[$idx]['total_15_20'] = $total_15_20;
+	        	$data[$idx]['total_20_25'] = $total_20_25;
+	        	$data[$idx]['total_25_30'] = $total_25_30;
+	        	$data[$idx]['total_30_'] = $total_30_;
+	        	$data[$idx]['total_below_service_level'] = $total_below_service_level;
+	        	$data[$idx]['grandtotal'] = $grandtotal;
+	        	$data[$idx]['persen_total'] = $persen_total;        	
+	        	
+	        	$data[$idx]['persen_0_5'] = $persen_0_5;
+	        	$data[$idx]['persen_5_10'] = $persen_5_10;
+	        	$data[$idx]['persen_10_15'] = $persen_10_15;
+	        	$data[$idx]['persen_15_20'] = $persen_15_20;
+	        	$data[$idx]['persen_20_25'] = $persen_20_25;
+	        	$data[$idx]['persen_25_30'] = $persen_25_30;
+	        	$data[$idx]['persen_30_'] = $persen_30_;
+	        	
+	        	$data[$idx]['persen_cumulative_0_5'] = $persen_cumulative_0_5;
+	        	$data[$idx]['persen_cumulative_5_10'] = $persen_cumulative_5_10;
+	        	$data[$idx]['persen_cumulative_10_15'] = $persen_cumulative_10_15;
+	        	$data[$idx]['persen_cumulative_15_20'] = $persen_cumulative_15_20;
+	        	$data[$idx]['persen_cumulative_20_25'] = $persen_cumulative_20_25;
+	        	$data[$idx]['persen_cumulative_25_30'] = $persen_cumulative_25_30;
+	        	$data[$idx]['persen_cumulative_30_'] = $persen_cumulative_30_;	
+	        }
+        }
+        else {
+        	
+        }
+        return $data;
+    }
+	public function convertDate($date){
+		$date = explode('-', $date);
+		return $date[2].'-'.$date[1].'-'.$date[0];
+	}
+}
+

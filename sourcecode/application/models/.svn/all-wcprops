@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/ACCQueueing/!svn/ver/139/trunk/application/models
+END
+Countercall.php
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/ACCQueueing/!svn/ver/137/trunk/application/models/Countercall.php
+END
+Branch.php
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ACCQueueing/!svn/ver/137/trunk/application/models/Branch.php
+END
+Branchmedia.php
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/ACCQueueing/!svn/ver/149/trunk/application/models/Branchmedia.php
+END
+Media.php
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svn/ACCQueueing/!svn/ver/149/trunk/application/models/Media.php
+END
+Ticketcategory.php
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/ACCQueueing/!svn/ver/133/trunk/application/models/Ticketcategory.php
+END
+Ticket.php
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/ACCQueueing/!svn/ver/149/trunk/application/models/Ticket.php
+END
+Countersession.php
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/ACCQueueing/!svn/ver/137/trunk/application/models/Countersession.php
+END

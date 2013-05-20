@@ -1,0 +1,28 @@
+<?php
+// Koneksi Database
+//$host = '10.100.10.13';
+//$username = 'ACCQueuing';
+//$password = '123ACCQueuing';
+//$dbname = 'acc_queueing';
+$host = 'localhost';
+$userName = 'root';
+$password = '';
+$dbName = 'acc_queuing';
+echo 'Connecting to Database...
+';
+$conn = mysql_connect($host, $userName, $password) or die( 'Could not connect to Database!' . mysql_error() );
+
+$db = mysql_select_db($dbName) or die( 'Database name does not exist' . mysql_error() );
+echo 'Connected to Database
+';
+$strSQL = "SELECT * FROM mst_setting WHERE `Key` = 'FrontlinersAutoLogoutTime'";
+$result = mysql_query($strSQL);
+$row = mysql_fetch_assoc($result);
+echo 'Default Logout Time : '.$row['Value'].'
+';
+
+$logoutTime = date("Y-m-d") . " " .$row['Value'];
+//$logouttime = ' 17:00:00';
+$strSQL = "UPDATE trn_counter_session SET LogoutTime =  '".$logoutTime."' WHERE IFNULL(LogoutTime, 0) = 0";
+mysql_query($strSQL) or die('update fail');
+echo 'Update Success!';

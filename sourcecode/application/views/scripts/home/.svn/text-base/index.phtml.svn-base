@@ -1,0 +1,40 @@
+<script>
+    $(document).ready(function() {
+        $('#main_menu').accordion({autoHeight: false});
+        $('#table_list').dataTable({
+            "bJQueryUI": true,
+            "bServerSide": true,
+            "sServerMethod": "POST",
+            "sPaginationType": "full_numbers",
+            "sAjaxSource": "/home/data"
+        });
+
+        $('#table_list tbody tr').live('dblclick', function () {
+                var sTitle;
+                var nTds = $('td', this);
+                var strID = $(nTds[0]).text();
+				//alert(strID);
+                window.location='/home/detail/id/' + strID;
+        });
+    });
+</script>
+
+<form class="form_element">
+<div id="content_header"><h2>Home - News</h2></div>
+<hr></hr>
+
+<table id="table_list">
+    <thead>
+        <tr>  
+        <tr>
+            <td>News ID</td>
+            <td>News Title</td>
+            <td>Create By</td>
+            <td>Create Date</td>
+        </tr>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+</form>

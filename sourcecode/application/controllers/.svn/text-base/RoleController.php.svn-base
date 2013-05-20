@@ -1,0 +1,27 @@
+<?php
+
+class RoleController extends Zend_Controller_Action
+{
+
+    public function init()
+    {
+        /* Initialize action controller here */
+    }
+	public function preDispatch(){
+    	$this->view->assign('logouturl', '<a href="login/logout">Logout</a>');
+		if (!Zend_Auth::getInstance()->hasIdentity()) {
+            $this->_helper->redirector('index', 'login');
+        }
+	}
+    public function indexAction()
+    {
+        // action body
+        // action body
+        $role_model = new Application_Model_Rolesmapping();
+        $this->view->roles = $role_model->fetchAll();
+        $this->view->page_title = 'Role List';
+    }
+
+
+}
+

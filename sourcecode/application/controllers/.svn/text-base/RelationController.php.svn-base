@@ -1,0 +1,82 @@
+<?php
+
+class RelationController extends Zend_Controller_Action
+{
+	private $model;
+    public function init()
+    {
+        /* Initialize action controller here */
+    	$this->model = new Application_Model_Relation();
+    	
+    	$this->view->AccordionID  = "Master";
+    	$this->view->SelectedMenu = "Relation";
+    }
+
+    public function preDispatch() {
+    	if (!Zend_Auth::getInstance()->hasIdentity()) {
+    		$this->_helper->redirector('login', '');
+    	}
+    }
+    
+    public function indexAction()
+    {
+        // action body
+    }
+
+    public function dataAction() {
+    	echo json_encode($this->model->getDataTable());
+    	exit;
+    }
+    
+    public function formAction(){
+    	switch ($this->getRequest()->getParam("type")) {
+    		case "add";
+    		$this->view->assign("strFormType", "Add");
+    		$this->view->assign("strID", "Automatic");
+    		break;
+    
+    		case "edit":
+    			$this->view->assign("strFormType", "Edit");
+    			$this->view->assign("strID", $this->getRequest()->getParam("id"));
+    
+    			$arrData = $this->model->getSingle($this->getRequest()->getParam("id"));
+    
+    			// Set record data to form
+    			$this->view->assign("RelationName", stripslashes($arrData['RelationName']));
+    			break;
+    	}
+    
+    }
+    
+    public function saveAction() {
+    	$strRelationName = addslashes($this->getRequest()->getParam("RelationName"));
+    	 
+    	switch ($this->getRequest()->getParam("type")) {
+    		case "Add":
+    			    			 
+    			$id = $this->model->insert($strRelationName);
+    			if ($id) {
+    				echo "<script>window.parent.saveSuccess('ID', $id)</script>";
+    			} else {
+    			echo "<script>window.parent.saveFailed('Please fill all required fields first')</script>";
+                }
+                break;
+    
+            case "Edit":    			
+       
+                $this->model->update(addslashes($this->getRequest()->getParam("ID")),
+    			$strRelationName);
+    			echo "<script>window.parent.editSuccess()</script>";
+    			break;
+    
+    			case "Delete":
+    			$this->model->delete(addslashes($this->getRequest()->getParam("ID")));
+                break;
+        }
+        
+    	exit;
+    	    
+    }
+
+}
+

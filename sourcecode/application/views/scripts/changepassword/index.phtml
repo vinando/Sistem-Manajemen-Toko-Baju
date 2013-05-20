@@ -1,0 +1,34 @@
+<div id="form_save_result" class="form_save_success">Save successful</div>
+<div id="content_header"><h2>Account - Change Password</h2></div>
+<hr></hr>
+
+<form id="form" method="POST" action="/changepassword/save" class="form_element" enctype="multipart/form-data" target="form_iframe">
+<table id="table_form">
+    <tr>
+        <td>Old Password *</td>
+        <td><input type="password" name="OldPassword" id="OldPassword" size="20" value="" class="text required"></td>
+    </tr>
+    <tr>
+        <td colspan="2"><hr style="border:1px dotted grey"></td>
+    </tr>
+    <tr>
+        <td>New Password *</td>
+        <td><input type="password" name="NewPassword" id="NewPassword" size="20" value="" class="text required"></td>
+    </tr>
+    <tr>
+        <td>Confirm Password *</td>
+        <td><input type="password" name="ConfirmNewPassword" id="ConfirmNewPassword" size="20" value="" class="text required"></td>
+    </tr>
+    <tr>
+        <td>&nbsp;</td>
+        <td>
+            <input type="submit" value="Save" id="btn_save" class="button">
+        </td>
+    </tr>
+</table>
+</form>
+<iframe id="form_iframe" name="form_iframe" src="" style="width:0;height:0;border:0px solid #FFFFFF;"></iframe>
+
+<script>
+    $("#form").validate();
+</script>

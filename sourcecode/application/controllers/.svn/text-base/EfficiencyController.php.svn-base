@@ -1,0 +1,132 @@
+<?php
+
+class EfficiencyController extends Zend_Controller_Action
+{
+	private $model;
+	private $model_report;
+	private $model_branchcounter;
+	
+    public function init() {
+        /* Initialize action controller here */
+        $this->model = new Application_Model_Branch();
+        $this->model_report = new Application_Model_Report();
+        $this->model_branchcounter = new Application_Model_Branchcounter();
+        $this->view->AccordionID  = "Reporting";
+        $this->view->SelectedMenu = "Efficiency";
+    }
+    
+	public function preDispatch() {
+    	if (!Zend_Auth::getInstance()->hasIdentity()) {
+    	    $this->_helper->redirector('login', '');
+        }
+    }
+    
+    public function indexAction() {
+        // action body
+        if($_SESSION['BranchID'] == '') $this->view->branchs = $this->model->getAll();
+        else $this->view->branchs = $this->model->getSingleBranch($_SESSION['BranchID']);
+    }
+    
+    public function viewresultAction()
+    {
+        // action body
+        $data = $this->getDataEfficiency();
+        $this->view->startdate = $this->getRequest()->getParam('startdate');
+        $this->view->enddate = $this->getRequest()->getParam('enddate');
+        $this->view->data = $data;
+    }
+    
+    public function getDataEfficiency(){
+    	$branchids = $this->getRequest()->getParam('branchids');
+        $branchids = explode(',', $branchids);
+        $startdate = $this->getRequest()->getParam('startdate');
+        $enddate = $this->getRequest()->getParam('enddate');
+        $data = array();
+        //echo $this->model_report->getTotalLoginTime('2', '1', '2005-07-06', '2012-07-19');
+        foreach ($branchids as $idx => $branchid){
+        	$branch = $this->model_report->getSingleBranch($branchid);
+        	$data[$idx]['branch'] = $branch;
+        	//$ticketcategories = $this->model_report->getTicketCategories($branchid);
+        	$ticketcategories = $this->model_branchcounter->getAllTicketCategory($branchid);
+        	$branch_total_login_time = 0;
+        	$branch_served = 0;
+        	$branch_total_service_time = 0;
+        	$branch_average = 0;
+        	$branch_idle_time = 0;
+        	$branch_effective = 0;
+        	
+        	foreach ($ticketcategories as $idx1 => $ticketkategory){
+        		$data[$idx]['data'][$idx1]['ticketcategory'] = $ticketkategory;
+        		$total_login_time = $this->model_report->getTotalLoginTime($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate));
+        		$served = $this->model_report->getServed($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate));
+        		$total_service_time = $this->model_report->getTotalServiceTime($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate));
+        		$average = $this->model_report->getAverageServiceTime($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate));
+        		$idle_time = $this->model_report->getIdleTime($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate));
+        		$effective = $this->model_report->getEffective($branchid, $ticketkategory['TicketCategoryID'], $this->convertDate($startdate), $this->convertDate($enddate));
+        		
+        		if($total_login_time[0]['totallogintime'] == '') $total_login_time[0]['totallogintime'] = '00:00:00'; 
+        		if($total_service_time[0]['totalservicetime'] == '') $total_service_time[0]['totalservicetime'] = '00:00:00';
+        		if($average[0]['averageservicetime'] == '') $average[0]['averageservicetime'] = '00:00:00';
+        		if($idle_time[0]['idletime'] == '') $idle_time[0]['idletime'] = '00:00:00';
+        		if($effective[0]['effective'] == '') $effective[0]['effective'] = 0; 
+        		
+        		$data[$idx]['data'][$idx1]['total_login_time'] = $total_login_time[0]['totallogintime'];
+        		$data[$idx]['data'][$idx1]['served'] = $served[0]['served'];
+        		$data[$idx]['data'][$idx1]['total_service_time'] = $total_service_time[0]['totalservicetime'];
+        		$data[$idx]['data'][$idx1]['average'] = $average[0]['averageservicetime'];
+        		$data[$idx]['data'][$idx1]['idle_time'] = $idle_time[0]['idletime'];
+        		$data[$idx]['data'][$idx1]['effective'] = $effective[0]['effective'];
+        		
+        		
+        		$branch_total_login_time += $this->time_to_sec($total_login_time[0]['totallogintime']);
+        		$branch_served += $served[0]['served'];
+        		$branch_total_service_time += $this->time_to_sec($total_service_time[0]['totalservicetime']);
+        		$branch_average += $this->time_to_sec($average[0]['averageservicetime']);
+        		$branch_idle_time += $this->time_to_sec($idle_time[0]['idletime']);
+        		$branch_effective += $effective[0]['effective'];
+        		
+        		
+        	}            	
+        	$data[$idx]['branch_total_login_time'] = $this->sec_to_time($branch_total_login_time);
+        	$data[$idx]['branch_served'] = $branch_served;
+        	$data[$idx]['branch_total_service_time'] = $this->sec_to_time($branch_total_service_time);
+        	$data[$idx]['branch_average'] = $this->sec_to_time($branch_average);
+        	$data[$idx]['branch_idle_time'] = $this->sec_to_time($branch_idle_time);
+        	$data[$idx]['branch_effective'] = $branch_effective;
+        }
+        return $data;	
+    }
+    
+    public function convertDate($date){
+		$date = explode('-', $date);
+		return $date[2].'-'.$date[1].'-'.$date[0];
+	}
+	
+	public function time_to_sec($time){
+		//echo $time.'<br>';
+		$sec = 0;
+		$arr = explode(':', $time);
+		//print_r($arr);
+		//echo '<br>';
+		$sec = $arr[0] * 3600 + $arr[1] * 60 + $arr[2];
+		return $sec;
+	}
+	
+	public function sec_to_time($seconds){
+		// extract hours
+	    $hours = floor($seconds / (60 * 60));
+	 
+	    // extract minutes
+	    $divisor_for_minutes = $seconds % (60 * 60);
+	    $minutes = floor($divisor_for_minutes / 60);
+	 
+	    // extract the remaining seconds
+	    $divisor_for_seconds = $divisor_for_minutes % 60;
+	    $seconds = ceil($divisor_for_seconds);
+	    if($hours < 10) $hours = '0'.$hours;
+	 	if($minutes < 10) $minutes = '0'.$minutes;
+	 	if($seconds < 10) $seconds = '0'.$seconds;
+	    return $hours.':'.$minutes.':'.$seconds;
+	}
+}
+
