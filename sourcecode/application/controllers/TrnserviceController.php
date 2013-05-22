@@ -90,10 +90,8 @@ class TrnserviceController extends Zend_Controller_Action {
                 $this->model->updateTrnNo($trn_id, $trn_no);
                 if ($trn_id && count($data['items']) > 0) {
                     foreach($data['items'] as $idx => $item) {
-                        $product = $item['product'];
-                        $arr = explode('|', $product);
-                        $product_id = $arr[0];
-                        $this->model->insertDetail($trn_id, $product_id, $item['size'], $item['color'], $item['material'], $item['price'], $item['qty'], $item['total']);
+                        $productname = $item['productname'];
+                        $this->model->insertDetail($trn_id, $productname, $item['sizename'], $item['colorname'], $item['materialname'], $item['price'], $item['qty'], $item['total']);
                     }
                     echo "<script type='text/javascript'>window.parent.saveSuccess('ID', $trn_id);</script>";
                 } else {
@@ -107,10 +105,8 @@ class TrnserviceController extends Zend_Controller_Action {
                 $this->model->deleteDetail($trn_id);
                 if (count($data['items']) > 0) {
                     foreach($data['items'] as $idx => $item) {
-                        $product = $item['product'];
-                        $arr = explode('|', $product);
-                        $product_id = $arr[0];
-                        $this->model->insertDetail($trn_id, $product_id, $item['size'], $item['color'], $item['material'], $item['price'], $item['qty'], $item['total']);
+                        $productname = $item['productname'];
+                        $this->model->insertDetail($trn_id, $productname, $item['sizename'], $item['colorname'], $item['materialname'], $item['price'], $item['qty'], $item['total']);
                     }
                     echo "<script type='text/javascript'>window.parent.saveSuccess('ID', $trn_id);</script>";
                 } else {
@@ -126,6 +122,25 @@ class TrnserviceController extends Zend_Controller_Action {
         }
 
         exit;
+    }
+
+    public function cetaknotaAction() {
+        $trn_id = $this->getRequest()->getParam("id");
+        $trn = $this->model->getSingle($trn_id);
+
+        // Set record data to form
+        $this->view->assign("BranchID", $trn['branchid']);
+        $this->view->assign("ServiceType", $trn['servicetype']);
+        $this->view->assign("TrnNo", $trn['trnno']);
+        $this->view->assign("TrnDate", $trn['trndate']);
+        $this->view->assign("CustomerId", $trn['customerid']);
+        $this->view->assign("CustomerName", $trn['customername']);
+        $this->view->assign("Phone", $trn['phone']);
+        $this->view->assign("Total", $trn['total']);
+        $this->view->assign("Dp", $trn['dp']);
+
+        $trn_details = $this->model->getTrnDetails($trn_id);
+        $this->view->assign("Items", $trn_details);
     }
 
     public function convertDate($date){

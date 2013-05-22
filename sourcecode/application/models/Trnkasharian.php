@@ -53,7 +53,10 @@ class Application_Model_Trnkasharian {
     }
 
     function insert($strBranchId, $strTrnNo, $strTrnDate, $strDescription, $strDebit, $strCredit) {
-        if(count($this->getCurrentBalance()) > 0) $current_balance = $this->getCurrentBalance()[0]; // = ['balance']
+        if(count($this->getCurrentBalance()) > 0) {
+            $arr = $this->getCurrentBalance();
+            $current_balance = $arr[0]; // = ['balance']
+        }
         else $current_balance = 0;
         $balance = $current_balance + $strDebit - $strCredit;
         $strSQL = "INSERT INTO trn_daily_cash (branchid, trnno, trndate, description, debit, credit, balance) VALUES ('$strBranchId', '$strTrnNo', '$strTrnDate', '$strDescription', '$strDebit', '$strCredit', '$balance')";
@@ -62,7 +65,10 @@ class Application_Model_Trnkasharian {
     }
 
     function update($strTrnId, $strDescription, $strDebit, $strCredit) {
-        if(count($this->getLastBalance()) > 0) $last_balance = $this->getLastBalance()[0]; // = ['balance']
+        if(count($this->getLastBalance()) > 0) {
+            $arr = $this->getLastBalance();
+            $last_balance = $arr[0]; // = ['balance']
+        }
         else $last_balance = 0;
         $balance = $last_balance + $strDebit - $strCredit;
         $strSQL = "UPDATE trn_daily_cash SET description = '$strDescription', debit = '$strDebit', credit = '$strCredit', balance = '$balance' WHERE id = '$strTrnId'";

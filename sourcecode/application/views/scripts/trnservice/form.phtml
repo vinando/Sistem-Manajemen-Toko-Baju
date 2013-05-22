@@ -19,40 +19,22 @@
         });
     });
 
-    function loadPrice(){
-        productid = $('#ProductID').val();
-        $.ajax({
-            url: '/trnsalesorder/jsongetproduct/ProductId/' + productid,
-            dataType: 'json',
-            async: false,
-            success: function(data){
-                //alert(data[0].PRIZE);
-                $('#Price').val(data.prize);
-            }
-        });
-        loadTotal();
-    }
-
     function loadTotal(){
         var price = $('#Price').val();
         var qty = $('#Qty').val();
         if(qty == '') qty = 0;
         var total = price * qty;
         $('#dTotal').val(total);
-        //loadGrandTotal();
     }
 
     function loadGrandTotal(){
         numrows = $('#numrows').val();
-        alert(numrows);
         var grandTotal = 0;
         for(i=0; i<numrows; i++){
             if($('#total_' + i).html() != ''){
                 grandTotal += parseInt($('#total_' + i).html());
             }
         }
-        //var grandTotal = parseInt($('#total1').val()) + parseInt($('#total2').val()) + parseInt($('#total3').val()) + parseInt($('#total4').val()) + parseInt($('#total5').val());
-        //alert(grandTotal);
         $('#grandtotal').html( grandTotal );
         $('#Total').val( grandTotal );
     }
@@ -129,56 +111,19 @@
         </tr>
         <tr class="rHeader">
             <td>
-                <label for="ProductID"></label>
-                <select name="ProductID" id="ProductID" class="dropdown" onchange="javascript:loadPrice();">
-                    <option value="">--</option>
-                    <?php
-                    foreach ($this->Products as $arrProduct) {
-                        ?>
-                        <option value="<?php echo $arrProduct["id"];?>"><?php echo $arrProduct["code"].'|'.$arrProduct["name"]?></option>
-                        <?php
-                    }
-                    ?>
-                </select>
+                <label for="ProductName"></label><input type="text" name="ProductName" id="ProductName">
             </td>
             <td>
-                <label for="Size"></label>
-                <select name="Size" id="Size" class="dropdown">
-                    <option value="">--</option>
-                    <?php
-                    foreach ($this->Sizes as $size) {
-                        ?>
-                        <option value="<?php echo $size["id"];?>"><?php echo $size["name"];?></option>
-                        <?php
-                    }
-                    ?>
-                </select>
+                <label for="SizeName"></label>
+                <input type="text" name="SizeName" id="SizeName">
             </td>
             <td>
-                <label for="Color"></label>
-                <select name="Color" id="Color" class="dropdown">
-                    <option value="">--</option>
-                    <?php
-                    foreach ($this->Colors as $Color) {
-                        ?>
-                        <option value="<?php echo $Color["id"];?>"><?php echo $Color["name"];?></option>
-                        <?php
-                    }
-                    ?>
-                </select>
+                <label for="ColorName"></label>
+                <input type="text" name="ColorName" id="ColorName">
             </td>
             <td>
-                <label for="Material"></label>
-                <select name="Material" id="Material" class="dropdown">
-                    <option value="">--</option>
-                    <?php
-                    foreach ($this->Materials as $Material) {
-                        ?>
-                        <option value="<?php echo $Material["id"];?>"><?php echo $Material["name"];?></option>
-                        <?php
-                    }
-                    ?>
-                </select>
+                <label for="MaterialName"></label>
+                <input type="text" name="MaterialName" id="MaterialName">
             </td>
             <td><label for="Price"></label> <input type="text" name="Price" id="Price" size="10" value="" class="" style="text-align: right;"></td>
             <td><label for="Qty"></label> <input type="text" name="Qty" id="Qty" size="10" value="" class="" onkeyup="javascript:loadTotal();"></td>
@@ -191,10 +136,10 @@
         foreach($this->Items as $idx => $item) {
         ?>
         <tr id="row_<?php echo $idx;?>">
-            <td id="product_<?php echo $idx;?>"><?php echo $item['productid'] . '|' . $item['productcode'] . '|' . $item['productname'];?></td>
-            <td><?php echo $item['sizename'];?><input type="hidden" id="size_<?php echo $idx;?>" value="<?php echo $item['sizeid'];?>"></td>
-            <td><?php echo $item['colorname'];?><input type="hidden" id="color_<?php echo $idx;?>" value="<?php echo $item['colorid'];?>"></td>
-            <td><?php echo $item['materialname'];?><input type="hidden" id="material_<?php echo $idx;?>" value="<?php echo $item['materialid'];?>"></td>
+            <td id="productname_<?php echo $idx;?>"><?php echo $item['productname'];?></td>
+            <td id="sizename_<?php echo $idx;?>"><?php echo $item['sizename'];?></td>
+            <td id="colorname_<?php echo $idx;?>"><?php echo $item['colorname'];?></td>
+            <td id="materialname_<?php echo $idx;?>"><?php echo $item['materialname'];?></td>
             <td id="price_<?php echo $idx;?>" align="right"><?php echo $item['price'];?></td>
             <td id="qty_<?php echo $idx;?>"><?php echo $item['amount'];?></td>
             <td id="total_<?php echo $idx;?>" align="right"><?php echo $item['total'];?></td>
@@ -220,6 +165,8 @@
 <input type="button" value="New" id="btn_new" class="button" onclick="window.location='/trnservice/form/type/add'">
 <input type="button" value="Delete" id="btn_delete" class="button">
 <input type="button" value="Close" id="btn_close" onclick="window.location='/trnservice'" class="button">
+<br/><br/>
+<?php echo ($this->strFormType == 'Edit') ? '<a href="/trnservice/cetaknota/id/'.$this->strID.'">Cetak Nota</a>' : '' ?>
 </form>
 <iframe id="form_iframe" name="form_iframe" src="" style="width:100%;height:200px;border:0px solid #FFFFFF;"></iframe>
 
@@ -234,23 +181,20 @@
 <script type="text/javascript">
     $('#btnAddDetail').click(function() {
         rowNum = parseInt(document.getElementById('numrows').value);
-        product = $('#ProductID').val() + '|' + $('#ProductID option:selected').text();
-        sizeid = $('#Size').val();
-        sizename = $('#Size option:selected').text();
-        colorid = $('#Color').val();
-        colorname = $('#Color option:selected').text();
-        materialid = $('#Material').val();
-        materialname = $('#Material option:selected').text();
+        productname = $('#ProductName').val();
+        sizename = $('#SizeName').val();
+        colorname = $('#ColorName').val();
+        materialname = $('#MaterialName').val();
         price = $('#Price').val();
         qty = $('#Qty').val();
         total = $('#dTotal').val();
         //alert(product);
         $('#tbody').append(
             '<tr id="row_' + rowNum + '">' +
-                '<td id="product_' + rowNum + '">' + product + '</td>' +
-                '<td>' + sizename + '<input type="hidden" id="size_' + rowNum + '" value="' + sizeid + '"></td>' +
-                '<td>' + colorname + '<input type="hidden" id="color_' + rowNum + '" value="' + colorid + '"></td>' +
-                '<td>' + materialname + '<input type="hidden" id="material_' + rowNum + '" value="' + materialid + '"></td>' +
+                '<td id="productname_' + rowNum + '">' + productname + '</td>' +
+                '<td id="sizename_' + rowNum + '">' + sizename + '</td>' +
+                '<td id="colorname_' + rowNum + '">' + colorname + '</td>' +
+                '<td id="materialname_' + rowNum + '">' + materialname + '</td>' +
                 '<td id="price_' + rowNum + '" align="right">' + price + '</td>' +
                 '<td id="qty_' + rowNum + '">' + qty + '</td>' +
                 '<td id="total_' + rowNum + '" align="right">' + total + '</td>' +
@@ -299,12 +243,10 @@
                 if($('#row_' + i) != null){
                     if( $('#row_' + i).html() != '' && $('#row_' + i).html() != null){
                         data.items[i] ={
-                            //"itemmode" : document.getElementById('itemmode' + i).value,
-                            //"itemid" : document.getElementById('itemid' + i).value,
-                            "product" : $('#product_' + i).html(),
-                            "size" : $('#size_' + i).val(),
-                            "color" : $('#color_' + i).val(),
-                            "material" : $('#material_' + i).val(),
+                            "productname" : $('#productname_' + i).html(),
+                            "sizename" : $('#sizename_' + i).html(),
+                            "colorname" : $('#colorname_' + i).html(),
+                            "materialname" : $('#materialname_' + i).html(),
                             "price" : $('#price_' + i).html(),
                             "qty" : $('#qty_' + i).html(),
                             "total" : $('#total_' + i).html()
@@ -313,7 +255,6 @@
                 }
             }
             obj = JSON.stringify(data);
-
             $.ajax({
                 url: '/trnservice/save/type/' + $('#type').val(),
                 type: 'POST',

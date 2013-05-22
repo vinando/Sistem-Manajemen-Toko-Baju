@@ -17,7 +17,7 @@ class UserController extends Zend_Controller_Action {
     }
 
     public function indexAction(){
-    	$dataTable = $this->model->getDataTable();
+    	//$dataTable = $this->model->getDataTable();
     	//echo json_encode($dataTable);
     }
 

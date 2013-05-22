@@ -120,7 +120,7 @@ if (in_array("setting", $_SESSION['Rights']) or in_array("exportdata", $_SESSION
                         <h3><a href="#" class="menu_header">Maintenance</a></h3>
                         <div style="padding-top:0">
                             <ul class="main_menu">
-                                <?php if (in_array("setting", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/mtnsetting" class="main_menu_item<?php if ($this->SelectedMenu == "Setting"){echo "_selected";}?>">Setting</a></li><?php }?>
+                                <?php if (in_array("setting", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/setting" class="main_menu_item<?php if ($this->SelectedMenu == "Setting"){echo "_selected";}?>">Setting</a></li><?php }?>
                                 <?php if (in_array("exportdata", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/mtnexportdata" class="main_menu_item<?php if ($this->SelectedMenu == "Export Data"){echo "_selected";}?>">Export Data</a></li><?php }?>
                             </ul>
                         </div>

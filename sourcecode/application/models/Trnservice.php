@@ -29,13 +29,9 @@ class Application_Model_Trnservice {
     }
 
     function getTrnDetails($trn_id) {
-        $strSQL = " SELECT t1.*, t2.code as productcode, t2.name as productname, t3.name as sizename, t4.name as colorname, t5.name as materialname
-                    FROM trn_service_dt t1, mst_product t2, mst_product_size t3, mst_product_color t4, mst_product_material t5
-                    WHERE t1.trnid = '$trn_id' AND
-                          t1.productid = t2.id AND
-                          t1.sizeid = t3.id AND
-                          t1.colorid = t4.id AND
-                          t1.materialid = t5.id";
+        $strSQL = " SELECT *
+                    FROM trn_service_dt
+                    WHERE trnid = '$trn_id'";
         $stmt = $this->sDb->query($strSQL);
         $stmt->setFetchMode(Zend_Db::FETCH_BOTH);
         $res = $stmt->fetchAll();
@@ -90,8 +86,8 @@ class Application_Model_Trnservice {
         return $this->sDb->lastInsertId();
     }
 
-    function insertDetail($strTrnID, $strProductID, $strSizeID, $strColorID, $strMaterialID, $strPrice, $strQty, $strTotal) {
-        $strSQL = "INSERT INTO trn_service_dt (trnid, productid, sizeid, colorid, materialid, price, amount, total) VALUES ('$strTrnID', '$strProductID', '$strSizeID', '$strColorID', '$strMaterialID', '$strPrice', '$strQty', '$strTotal')";
+    function insertDetail($strTrnID, $strProductName, $strSizeName, $strColorName, $strMaterialName, $strPrice, $strQty, $strTotal) {
+        $strSQL = "INSERT INTO trn_service_dt (trnid, productname, sizename, colorname, materialname, price, amount, total) VALUES ('$strTrnID', '$strProductName', '$strSizeName', '$strColorName', '$strMaterialName', '$strPrice', '$strQty', '$strTotal')";
         $stmt = $this->sDb->query($strSQL);
     }
 

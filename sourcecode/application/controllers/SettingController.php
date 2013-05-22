@@ -17,30 +17,60 @@ class SettingController extends Zend_Controller_Action {
     }
 
     public function indexAction(){
-        $arrSettings = $this->model->getAll();
-        //var_dump($arrSettings);exit;
 
-        // Set record data to form
-        foreach ($arrSettings as $arrSetting) {
-            //var_dump($arrSetting);
-            $this->view->assign($arrSetting["Key"], $arrSetting["Value"]);
+    }
+
+    public function dataAction() {
+        echo json_encode($this->model->getDataTable());
+        exit;
+    }
+
+    public function formAction(){
+        switch ($this->getRequest()->getParam("type")) {
+            case "add";
+                $this->view->assign("strFormType", "Add");
+                $this->view->assign("strID", "Automatic");
+                break;
+
+            case "edit":
+                $this->view->assign("strFormType", "Edit");
+                $this->view->assign("strID", $this->getRequest()->getParam("id"));
+
+                $arrData = $this->model->getSingle($this->getRequest()->getParam("id"));
+
+                // Set record data to form
+                $this->view->assign("strID", $arrData['id']);
+                $this->view->assign("Name", $arrData['name']);
+                $this->view->assign("Value", $arrData['value']);
+                break;
         }
-
-        $model = new Application_Model_Ticketcategory();
-        $this->view->assign("Categories", $model->getAll());
     }
 
     public function saveAction() {
-        $arrRequest = $this->getRequest()->getParams();
-        $arrKeys = array_keys($arrRequest);
+        switch ($this->getRequest()->getParam("type")) {
+            case "Add":
+                $this->model->insert(addslashes($this->getRequest()->getParam("Name")),
+                    addslashes($this->getRequest()->getParam("Value"))
+                );
 
-        foreach ($arrKeys as $strKey) {
-            if ($strKey != "controller" and $strKey != "action" and $strKey != "module" and $strKey != "type")
-            $this->model->update($strKey, $arrRequest[$strKey]);
+                echo "<script>window.parent.saveSuccess('ID', '" . $this->getRequest()->getParam("ID") . "');window.parent.disableField('ID')</script>";
+                break;
+
+            case "Edit":
+                $this->model->update(addslashes($this->getRequest()->getParam("ID")),
+                    addslashes($this->getRequest()->getParam("Name")),
+                    addslashes($this->getRequest()->getParam("Value"))
+                );
+
+                echo "<script type='text/javascript'>window.parent.editSuccess()</script>";
+                break;
+
+            case "Delete":
+                $this->model->delete(addslashes($this->getRequest()->getParam("ID")));
+                break;
         }
-
-        echo "<script>window.parent.editSuccess()</script>";
         exit;
+
     }
 }
 

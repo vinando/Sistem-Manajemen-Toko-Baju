@@ -16,11 +16,11 @@
         </tr>
         <tr>
             <td>&nbsp;</td>
-            <td style="font-size: 20px;font-weight: bold;">Nota Pesanan</td>
+            <td style="font-size: 20px;font-weight: bold;">Nota Service</td>
         </tr>
         <tr>
             <td>&nbsp;</td>
-            <td style="font-size: 16px;font-weight: bold;">No: <?php echo $this->OrderNo;?></td>
+            <td style="font-size: 16px;font-weight: bold;">No: <?php echo $this->TrnNo;?></td>
         </tr>
         <tr>
             <td>&nbsp;</td>
@@ -30,7 +30,6 @@
     <br/>
     <table width="100%" cellpadding="3">
         <tr bgcolor="#e6e6fa">
-            <td width="100">Kode Barang</td>
             <td width="250">Nama Barang</td>
             <td>Ukuran</td>
             <td>Warna</td>
@@ -44,7 +43,6 @@
         foreach($this->Items as $idx => $item) {
     ?>
         <tr>
-            <td><?php echo $item['productcode'];?></td>
             <td><?php echo $item['productname'];?></td>
             <td><?php echo $item['sizename'];?></td>
             <td><?php echo $item['colorname'];?></td>
@@ -58,15 +56,15 @@
         }
     ?>
         <tr bgcolor="aqua">
-            <td colspan="7" align="right">Grand Total</td>
+            <td colspan="6" align="right">Grand Total</td>
             <td align="right"><span id="grandtotal" style="color: red;text-align: right;"><?php echo $grandtotal;?></span></td>
         </tr>
         <tr>
-            <td colspan="7" align="right">DP</td>
+            <td colspan="6" align="right">DP</td>
             <td align="right"><span id="dp" style="color: red;text-align: right;"><?php echo $this->Dp;?></span></td>
         </tr>
         <tr>
-            <td colspan="7" align="right">Sisa</td>
+            <td colspan="6" align="right">Sisa</td>
             <td align="right" style="border-top: solid 1px #000099;"><span id="sisa" style="color: red;text-align: right;"><?php echo $grandtotal - $this->Dp;?></span></td>
         </tr>
     </table>
@@ -99,7 +97,7 @@
     </table>
 </div>
 <br/><br/><br/>
-<a href="#" id="btnCetak">Cetak</a> | <a href="/trnorder">Cancel</a>
+<a href="#" id="btnCetak">Cetak</a> | <a href="/trnservice">Cancel</a>
 <script type="text/javascript">
     $('#btnCetak').click(function(){
         $('#nota-penjualan').printElement();
