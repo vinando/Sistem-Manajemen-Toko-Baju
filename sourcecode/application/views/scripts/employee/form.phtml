@@ -24,6 +24,21 @@
             </td>
         </tr>
         <tr>
+            <td>Employee Type</td>
+            <td><label for="EmployeeType"></label>
+                <select name="EmployeeType" id="EmployeeType" class="dropdown required">
+                    <option value="">--</option>
+                    <?php
+                    foreach ($this->EmployeeTypes as $type) {
+                        ?>
+                        <option value="<?php echo $type["value"];?>" <?php if ($this->EmployeeType == $type["value"]) {echo "selected";}?>><?php echo $type["value"];?></option>
+                        <?php
+                    }
+                    ?>
+                </select>
+            </td>
+        </tr>
+        <tr>
             <td>Employee Code * </td>
             <td><label for="EmployeeCode"></label> <input type="text" name="EmployeeCode" id="EmployeeCode" size="20" size="10" value="<?php echo $this->EmployeeCode ?>" class="text required"></td>
         </tr>

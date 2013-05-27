@@ -48,11 +48,13 @@ class EmployeeController extends Zend_Controller_Action {
         }
         $model = new Application_Model_Branch();
         $this->view->assign("Branches", $model->getAll());
+        $this->view->assign("EmployeeTypes", $this->model->getEmployeeTypes());
     }
 
     public function saveAction() {
     	$strEmployeeCode    = $this->getRequest()->getParam("EmployeeCode");
         $strBranchID        = $this->getRequest()->getParam("BranchID");
+        $strEmployeeType    = $this->getRequest()->getParam("EmployeeType");
         $strEmployeeName    = $this->getRequest()->getParam("EmployeeName");
         $strDOB             = $this->convertDate($this->getRequest()->getParam("DOB"));
         $strGender          = $this->getRequest()->getParam("Gender");
@@ -72,7 +74,7 @@ class EmployeeController extends Zend_Controller_Action {
                     break;
                 }
 
-                $id = $this->model->insert($strBranchID, $strEmployeeCode, addslashes($strEmployeeName), $strDOB, $strGender, $strSalary);
+                $id = $this->model->insert($strBranchID, $strEmployeeType, $strEmployeeCode, addslashes($strEmployeeName), $strDOB, $strGender, $strSalary);
                 if ($id) {
                     echo "<script type='text/javascript'>window.parent.saveSuccess('ID', $id);</script>";
                 } else {
@@ -96,6 +98,7 @@ class EmployeeController extends Zend_Controller_Action {
                 //echo $this->getRequest()->getParam("MainDisplay");exit;
                 $this->model->update(   addslashes($EmployeeID),
                                         $strBranchID,
+                                        $strEmployeeType,
                 		                addslashes($strEmployeeCode),
                                         addslashes($strEmployeeName),
                                         $strDOB,

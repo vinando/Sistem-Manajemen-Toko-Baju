@@ -7,6 +7,14 @@ class Application_Model_Product {
 		$this->sDb = Zend_Registry::get('DB');
 	}
 
+    function getProductTypes() {
+        $strSQL = "SELECT * FROM mst_setting WHERE name = 'Product Type'";
+        $stmt = $this->sDb->query($strSQL);
+        $stmt->setFetchMode(Zend_Db::FETCH_BOTH);
+        $res = $stmt->fetchAll();
+        return $res;
+    }
+
 	function getAll($intLimit = 0, $intOffset = 50) {
 		$strSQL = "SELECT * FROM mst_product LIMIT $intLimit, $intOffset";
 		$stmt = $this->sDb->query($strSQL);
@@ -80,7 +88,7 @@ class Application_Model_Product {
 	}
 
     function getSizes() {
-        $strSQL = "SELECT * FROM mst_product_size";
+        $strSQL = "SELECT * FROM mst_setting WHERE name = 'Product Size'";
         $stmt = $this->sDb->query($strSQL);
         $stmt->setFetchMode(Zend_Db::FETCH_BOTH);
         $res = $stmt->fetchAll();
@@ -88,7 +96,7 @@ class Application_Model_Product {
     }
 
     function getColors() {
-        $strSQL = "SELECT * FROM mst_product_color";
+        $strSQL = "SELECT * FROM mst_setting WHERE name = 'Product Color'";
         $stmt = $this->sDb->query($strSQL);
         $stmt->setFetchMode(Zend_Db::FETCH_BOTH);
         $res = $stmt->fetchAll();
@@ -96,7 +104,7 @@ class Application_Model_Product {
     }
 
     function getMaterials() {
-        $strSQL = "SELECT * FROM mst_product_material";
+        $strSQL = "SELECT * FROM mst_setting WHERE name = 'Product Material'";
         $stmt = $this->sDb->query($strSQL);
         $stmt->setFetchMode(Zend_Db::FETCH_BOTH);
         $res = $stmt->fetchAll();

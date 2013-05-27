@@ -23,6 +23,14 @@ class Application_Model_Employee {
         return $res;
     }
 
+    function getEmployeeTypes() {
+        $strSQL = "SELECT * FROM mst_setting WHERE name = 'Employee Type'";
+        $stmt = $this->sDb->query($strSQL);
+        $stmt->setFetchMode(Zend_Db::FETCH_BOTH);
+        $res = $stmt->fetchAll();
+        return $res;
+    }
+
     function getAllPenjahitByBranchID($BranchID) {
         $strSQL = " SELECT *
                     FROM mst_employee
@@ -79,14 +87,14 @@ class Application_Model_Employee {
 		return $res;
 	}
 
-	function insert($strBranchID, $strCode, $strName, $strDOB, $strGender, $strSalary) {
-        $strSQL = "INSERT INTO mst_employee (branchid, code, name, dob, gender, salary) VALUES ('$strBranchID', '$strCode', '$strName', '$strDOB', '$strGender', '$strSalary')";
+	function insert($strBranchID, $strType, $strCode, $strName, $strDOB, $strGender, $strSalary) {
+        $strSQL = "INSERT INTO mst_employee (branchid, type, code, name, dob, gender, salary) VALUES ('$strBranchID', '$strType', '$strCode', '$strName', '$strDOB', '$strGender', '$strSalary')";
         $stmt = $this->sDb->query($strSQL);
         return $this->sDb->lastInsertId();
 	}
 
-	function update($strEmployeeID, $strBranchID, $strCode, $strName, $strDOB, $strGender, $strSalary) {
-        $strSQL = "UPDATE mst_employee SET branchid = '$strBranchID', code = '$strCode', name = '$strName', dob = '$strDOB', gender = '$strGender', salary = '$strSalary' WHERE id = '$strEmployeeID'";
+	function update($strEmployeeID, $strBranchID, $strType, $strCode, $strName, $strDOB, $strGender, $strSalary) {
+        $strSQL = "UPDATE mst_employee SET branchid = '$strBranchID', type = '$strType', code = '$strCode', name = '$strName', dob = '$strDOB', gender = '$strGender', salary = '$strSalary' WHERE id = '$strEmployeeID'";
         $stmt = $this->sDb->query($strSQL);
 	}
 

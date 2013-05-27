@@ -19,12 +19,16 @@
         <tr>
             <td>Type * </td>
             <td>
-                <label for="ProductType"></label>
+                <label for="ProductType"><?php?></label>
                 <select name="ProductType" id="ProductType" class="required">
                     <option value="">-- Pilih Product Type --</option>
-                    <option value="Finished Product" <?php if ($this->ProductType == "Finished Product") {echo "selected";}?> >Finished Product</option>
-                    <option value="Raw Material" <?php if ($this->ProductType == "Raw Material") {echo "selected";}?> >Raw Material</option>
-                    <option value="Accessories" <?php if ($this->ProductType == "Accessories") {echo "selected";}?>>Accessories</option>
+                    <?php
+                    foreach($this->ProductTypes as $idx => $ProductType) {
+                        ?>
+                        <option value="<?php echo $ProductType['value'];?>" <?php if ($this->ProductType == $ProductType['value']) {echo "selected";}?> ><?php echo $ProductType['value'];?></option>
+                        <?php
+                    }
+                    ?>
                 </select>
             </td>
         </tr>
@@ -37,7 +41,7 @@
                     <?php
                     foreach($this->Sizes as $idx => $Size) {
                     ?>
-                    <option value="<?php echo $Size['name'];?>" <?php if ($this->Size == $Size['name']) {echo "selected";}?> ><?php echo $Size['name'];?></option>
+                    <option value="<?php echo $Size['value'];?>" <?php if ($this->Size == $Size['value']) {echo "selected";}?> ><?php echo $Size['value'];?></option>
                     <?php
                     }
                     ?>
@@ -53,7 +57,7 @@
                     <?php
                     foreach($this->Colors as $idx => $Color) {
                         ?>
-                        <option value="<?php echo $Color['name'];?>" <?php if ($this->Color == $Color['name']) {echo "selected";}?> ><?php echo $Color['name'];?></option>
+                        <option value="<?php echo $Color['value'];?>" <?php if ($this->Color == $Color['value']) {echo "selected";}?> ><?php echo $Color['value'];?></option>
                         <?php
                     }
                     ?>
@@ -69,7 +73,7 @@
                     <?php
                     foreach($this->Materials as $idx => $Material) {
                         ?>
-                        <option value="<?php echo $Material['name'];?>" <?php if ($this->Material == $Material['name']) {echo "selected";}?> ><?php echo $Material['name'];?></option>
+                        <option value="<?php echo $Material['value'];?>" <?php if ($this->Material == $Material['value']) {echo "selected";}?> ><?php echo $Material['value'];?></option>
                         <?php
                     }
                     ?>

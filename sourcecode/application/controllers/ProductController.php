@@ -46,6 +46,8 @@ class ProductController extends Zend_Controller_Action {
                 break;
         }
         $branch_model = new Application_Model_Branch();
+
+        $this->view->assign("ProductTypes", $this->model->getProductTypes());
         $this->view->assign("Sizes", $this->model->getSizes());
         $this->view->assign("Colors", $this->model->getColors());
         $this->view->assign("Materials", $this->model->getMaterials());
