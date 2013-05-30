@@ -13,10 +13,10 @@
     }
 </script>
 
-<div id="content_header"><h2>Transaction - Using Of Raw Material</h2><div style="float:right"><h2 id="form_type"><?php echo $this->strFormType;?> Record</h2></div></div>
+<div id="content_header"><h2>Transaction - Service Using Of Raw Material</h2><div style="float:right"><h2 id="form_type"><?php echo $this->strFormType;?> Record</h2></div></div>
 <hr>
 
-<form id="form" method="POST" action="/trnpenggunaanbahan/save" class="form_element" enctype="multipart/form-data" target="form_iframe">
+<form id="form" method="POST" action="/trnpenggunaanbahanservice/save" class="form_element" enctype="multipart/form-data" target="form_iframe">
 
     <table id="table_form">
         <tr>
@@ -28,15 +28,15 @@
             <td><input type="text" name="BranchID" id="BranchID" size="20" readonly value="<?php echo $_SESSION['BranchID'];?>" class="readonlytext"></td>
         </tr>
         <tr>
-            <td>Order ID</td>
+            <td>Service ID</td>
             <td>
-                <label for="OrderId"></label> <input type="text" name="OrderId" id="OrderId" size="20" readonly size="10" value="<?php echo ($this->strFormType == 'Edit') ? $this->OrderId : '' ?>" class="readonlytext">
-                <input type="button" name="orderLookup" id="orderLookup" value="Order Lookup" onclick="javascript:return showLookup('order');">
+                <label for="ServiceId"></label> <input type="text" name="ServiceId" id="ServiceId" size="20" readonly size="10" value="<?php echo ($this->strFormType == 'Edit') ? $this->ServiceId : '' ?>" class="readonlytext">
+                <input type="button" name="serviceLookup" id="serviceLookup" value="Service Lookup" onclick="javascript:return showLookup('service');">
             </td>
         </tr>
         <tr>
-            <td>Order No</td>
-            <td><label for="OrderNo"></label> <input type="text" name="OrderNo" id="OrderNo" size="20" readonly size="10" value="<?php echo ($this->strFormType == 'Edit') ? $this->OrderNo : '' ?>" class="readonlytext"></td>
+            <td>Service No</td>
+            <td><label for="ServiceNo"></label> <input type="text" name="ServiceNo" id="ServiceNo" size="20" readonly size="10" value="<?php echo ($this->strFormType == 'Edit') ? $this->ServiceNo : '' ?>" class="readonlytext"></td>
         </tr>
         <tr>
             <td>Trn. No</td>
@@ -95,9 +95,9 @@
 <input type="hidden" name="type" id="type" value="<?php echo $this->strFormType; ?>">
 <input type="hidden" id="numrows" name="numrows" value="<?php echo $this->NumRows ?>">
 <input type="button" value="Save" id="btn_save" class="button" onclick="javascript:save_form();">
-<input type="button" value="New" id="btn_new" class="button" onclick="window.location='/trnpenggunaanbahan/form/type/add'">
+<input type="button" value="New" id="btn_new" class="button" onclick="window.location='/trnpenggunaanbahanservice/form/type/add'">
 <input type="button" value="Delete" id="btn_delete" class="button">
-<input type="button" value="Close" id="btn_close" onclick="window.location='/trnpenggunaanbahan'" class="button">
+<input type="button" value="Close" id="btn_close" onclick="window.location='/trnpenggunaanbahanservice'" class="button">
 </form>
 <iframe id="form_iframe" name="form_iframe" src="" style="width:100%;height:200px;border:0px solid #FFFFFF;"></iframe>
 
@@ -137,8 +137,8 @@
 
         data['ID'] = $('#ID').val();
         data['BranchID'] = $('#BranchID').val();
-        data['OrderId'] = $('#OrderId').val();
-        data['OrderNo'] = $('#OrderNo').val();
+        data['ServiceId'] = $('#ServiceId').val();
+        data['ServiceNo'] = $('#ServiceNo').val();
         data['TrnNo'] = $('#TrnNo').val();
         data['TrnDate'] = $('#TrnDate').val();
 
@@ -162,12 +162,12 @@
         obj = JSON.stringify(data);
         //alert(obj);
         $.ajax({
-            url: '/trnpenggunaanbahan/save/type/' + $('#type').val(),
+            url: '/trnpenggunaanbahanservice/save/type/' + $('#type').val(),
             type: 'POST',
             data : {jsonstring : obj},
             success : function(msg){
                 //alert(msg);
-                window.location = "/trnpenggunaanbahan";
+                window.location = "/trnpenggunaanbahanservice";
             }
         });
         return false;
@@ -185,8 +185,8 @@
             buttons: {
                 "Delete record": function() {
                     $( this ).dialog("close");
-                    $.get("/trnpenggunaanbahan/save/type/Delete/ID/" + $('#ID').val(), function() {
-                        window.location = '/trnpenggunaanbahan';
+                    $.get("/trnpenggunaanbahanservice/save/type/Delete/ID/" + $('#ID').val(), function() {
+                        window.location = '/trnpenggunaanbahanservice';
                     });
                 },
                 Cancel: function() {

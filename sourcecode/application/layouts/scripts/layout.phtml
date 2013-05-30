@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Toko Jaket Kulit Kalong</title>
+        <title>Site Name</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link type="text/css" href="/css/smoothness/jquery-ui-1.8.19.custom.css" rel="Stylesheet" />
         <link type="text/css" href="/css/jquery.dataTables.css" rel="Stylesheet" />
@@ -70,7 +70,7 @@ if (in_array("trnorder", $_SESSION['Rights']) or
     in_array("trnserviceassignment", $_SESSION['Rights']) or
     in_array("trnfinishservice", $_SESSION['Rights']) or
     in_array("trnpenggunaanbahan", $_SESSION['Rights']) or
-
+    in_array("trnpenggunaanbahanservice", $_SESSION['Rights']) or
     in_array("trnsalesorder", $_SESSION['Rights']) or
     in_array("trnpurchasesorder", $_SESSION['Rights']) or
     in_array("trnkasharian", $_SESSION['Rights'])
@@ -86,6 +86,7 @@ if (in_array("trnorder", $_SESSION['Rights']) or
                                 <?php if (in_array("trnserviceassignment", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnserviceassignment" class="main_menu_item<?php if ($this->SelectedMenu == "Trnserviceassignment"){echo "_selected";}?>">Service Assignment</a></li><?php }?>
                                 <?php if (in_array("trnfinishservice", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnfinishservice" class="main_menu_item<?php if ($this->SelectedMenu == "Finishservice"){echo "_selected";}?>">Finish Service</a></li><?php }?>
                                 <?php if (in_array("trnpenggunaanbahan", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnpenggunaanbahan" class="main_menu_item<?php if ($this->SelectedMenu == "Penggunaanbahan"){echo "_selected";}?>">Penggunaan Bahan</a></li><?php }?>
+                                <?php if (in_array("trnpenggunaanbahanservice", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnpenggunaanbahanservice" class="main_menu_item<?php if ($this->SelectedMenu == "Penggunaanbahanservice"){echo "_selected";}?>">Penggunaan Bahan Service</a></li><?php }?>
                                 <?php if (in_array("trnsalesorder", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnsalesorder" class="main_menu_item<?php if ($this->SelectedMenu == "Salesorder"){echo "_selected";}?>">Sales Order</a></li><?php }?>
                                 <?php if (in_array("trnpurchasesorder", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnpurchasesorder" class="main_menu_item<?php if ($this->SelectedMenu == "Purchasesorder"){echo "_selected";}?>">Purchases Order</a></li><?php }?>
                                 <?php if (in_array("trnkasharian", $_SESSION['Rights'])) {?><li class="main_menu_item"><a href="/trnkasharian" class="main_menu_item<?php if ($this->SelectedMenu == "Dailycash"){echo "_selected";}?>">Daily Cash</a></li><?php }?>
